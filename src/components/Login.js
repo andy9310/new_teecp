@@ -65,7 +65,7 @@ function Login() {
             />
             <div className="button-container">
                 <Link to="/register"><button className="button secondary">新增帳號</button></Link>
-                <button onClick={login} className="button primary">登入</button>
+                <Link to="/user"><button onClick={login} className="button primary">登入</button></Link>
             </div>
           </div>
           <div align="center">

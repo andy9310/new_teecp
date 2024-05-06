@@ -1,0 +1,134 @@
+.form-board{
+    margin-top: 24px; /* Assuming the base is 4px, so 6 * 4 = 24px */
+    margin-bottom: 24px; /* Same as margin-top */
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* This is an approximation */
+    background-color: white;
+    padding-left: 32px; /* Assuming the base is 4px, so 8 * 4 = 32px */
+    padding-right: 32px; /* Same as padding-left */
+    padding-top: 16px; /* Assuming the base is 4px, so 4 * 4 = 16px */
+    padding-bottom: 16px; /* Same as padding-top */
+}
+.form-sections{
+    display: grid;
+    gap: 24px; /* Assuming the base size is 4px, so 12 * 4 = 48px */
+}
+@media (min-width: 1200px) { /* This breakpoint aligns with Tailwind's 'xl' */
+    .form-sections{
+        grid-template-columns: repeat(2, 1fr); /* 2 columns of equal width */
+    }
+}
+.form-sections h1{
+    font-size:large;
+}
+.form-sections h2{
+    font-size:medium;
+}
+.red-words{
+    color: #ef4444; /* This is an approximation of Tailwind's 'red-500' */
+    font-size: 16px; /* Assuming 'base' translates to 16px in Tailwind's settings */
+}
+.grid-section{
+    margin:10px;
+    /* background-clip: padding-box;
+    box-shadow: 0 0 10px #ff0000; */
+    display: grid;
+    background-color: white;
+}
+
+@media (min-width: 768px) { /* This breakpoint is typically used for 'md' in Tailwind */
+    .grid-section{
+        grid-template-columns: repeat(2, 1fr); /* 2 columns of equal width */
+    }
+}
+
+.grid-section div{
+    padding: 6px;
+}
+
+.detail-section{
+    margin:10px;
+    /* background-clip: padding-box;
+    box-shadow: 0 0 10px #ff0000; */
+    display: grid;
+    background-color: white;
+}
+@media (min-width: 768px) { /* This breakpoint is typically used for 'md' in Tailwind */
+    .detail-section{
+        grid-template-columns: repeat(1, 1fr); /* 2 columns of equal width */
+    }
+}
+.detail-style{
+    border-radius: 4px;
+    border: 1px solid transparent;
+    border-color: black;
+    margin: 5px;
+    padding:5px;
+}
+
+.alert {
+    padding: 10px;
+    margin: 10px 0;
+    color: white;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    border-color: #4CAF50;
+    outline: 1px solid;
+}
+
+.alert.success {
+    /*background-color: #4CAF50; /* Green for success messages */
+    color:#4CAF50;
+}
+.input-text{
+    border: none; 
+    outline: none; 
+    padding: 5px; 
+    font-size: 16px; 
+    border-bottom: 1px solid gray; 
+}
+.form-section-style{
+    background-color: rgb(167, 162, 162);
+    justify-content: center;
+    align-items: center;
+}
+.form-section-style h1{
+    margin:10px;
+}
+
+.button-section{
+    text-align: center;
+    display: flex;
+    align-content: center;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 16px; /* Assuming 1 unit is 4px, so 4 * 4 = 16px */
+}
+
+@media (min-width: 1024px) { /* Assuming 'lg' starts at 1024px */
+    .button-section{
+        flex-direction: row;
+        align-items: flex-start;
+    }
+}
+
+.button-section div{
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.button-section button{
+    border-radius: 9999px; /* Achieves the fully rounded effect */
+    background-color: rgb(29, 71, 110); /* Replace 'xxxxxx' with the actual hex code for 'basic' */
+    color: white;
+    padding-top: 8px; /* Assuming 1 unit = 4px */
+    padding-bottom: 8px;
+    padding-left: 64px; /* Assuming 1 unit = 4px, 16 units */
+    padding-right: 64px;
+    margin: 4px; /* Assuming 1 unit = 4px */
+}
+.button-section p{
+    font-size: 16px;
+}
+.button-download{
+    color: white;
+}
