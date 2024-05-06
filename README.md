@@ -1,6 +1,8 @@
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# This is the rebuilt of new TEECP for NTU GICE
+# building schedule: 1 month
 
 ## Available Scripts
 
