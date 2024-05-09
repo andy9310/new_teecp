@@ -2,12 +2,13 @@ import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import './Login.css';
 import { useNavigate } from 'react-router-dom';
-// import { SampleContext } from '../contexts/SampleContext';
+import StudentHeader from '../side_components/studentside_header';
+import StudentFooter from '../side_components/studentside_footer';
+
 
 import { Link } from 'react-router-dom';
 
 function Login() {
-    // const [email, setEmail] = useState('');
     const [user, setUser] = useState({ ID: '', password: '' });
 
     const handleInputChange = (e) => {
@@ -20,31 +21,9 @@ function Login() {
         console.log('Logging in', user);
         alert("login");
     };
-    // const [password, setPassword] = useState('');
-    // const { userid, setUserid } = useContext(SampleContext);
-    // const navigate = useNavigate();
-  
-    // const handleSubmit = async (event) => {
-    //   event.preventDefault();
-    //   try {
-    //     const response = await axios.post('https://ctfmidterm-21d491f65c05.herokuapp.com/register_server/api/login/', {
-    //       email,
-    //       password
-    //     });
-    //     console.log(response.data); // 處理登入成功
-    //     if(response.data.status === "invalid"){
-    //       alert("login failed, Wrong email or password");
-    //     }
-    //     else{
-    //       setUserid(response.data.user_id.user_id);
-    //       navigate('/chatroom');
-    //     }
-    //   } catch (error) {
-    //     console.error(error); // 處理錯誤情況
-    //   }
-    // };
     return (
         <>
+          <StudentHeader></StudentHeader>
           <div className="container">
             <h1 className="title">登入使用<span className="highlight">（請先新增帳號）</span></h1>
             <input
@@ -81,6 +60,7 @@ function Login() {
                   </li>
               </ul>
           </div>
+          <StudentFooter></StudentFooter>
         </>
         
           
