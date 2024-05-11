@@ -16,7 +16,7 @@ function Check() {
                         <p className="text-xl">Review</p>
                     </div>
                 </div>
-                <Link to="/check-form">
+                <Link to="/dnd">
                     <div className='menu-board'>
                         <div>
                             <img src={checkboard} />

@@ -5,6 +5,7 @@ import C from "../images/C.png";
 import { Link } from 'react-router-dom';
 
 function UserForm() {
+    const [time, setTime] = useState(Date.now);
     const submitForm = () => {
         // Login logic here
         // console.log('Logging in', user);
@@ -14,7 +15,7 @@ function UserForm() {
         <>  
             <div className="form-board">
                 <div className="alert success">
-                    上次自動儲存時間：
+                    上次自動儲存時間：{time}
                 </div>
                 <form className="form-sections">
                     <div className="form-section-style">
@@ -179,6 +180,39 @@ function UserForm() {
                 </div>
                 <div className="form-section-style">
                     <h1>⑥ 指導教授同意書<span className="red-words">（無則免填）</span></h1>
+                    <div className="grid-section">
+                            <div>
+                                <h2>准考證號碼</h2>
+                                <input type='text' className="input-text" prefix="9020" dense v-model="form.admission" placeholder="由本所填寫"></input>
+                            </div>
+                            <div>
+                                <h2>本校報名流水號</h2>
+                                <input type='text' className="input-text" dense v-model="form.regID"></input>
+                            </div>
+                            <div>
+                                <h2>姓名</h2>
+                                <input type='text'  className="input-text" dense v-model="form.name"></input>
+                            </div>
+                            <div>
+                                <h2>身分證字號</h2>
+                                <input type='text' className="input-text" dense v-model="form.identity" placeholder="A123456789或外國AA12345678"></input>
+                            </div>
+                            <div>
+                                <h2>出生年</h2>
+                                <select dense></select>
+                            </div>
+                            <div>
+                                <h2>手機號碼</h2>
+                                <input type='text' className="input-text" dense v-model="form.phone" placeholder="09XX-XXXXXX"></input>
+                            </div>
+                            <div>
+                                <h2>Email</h2>
+                                <input type='text' className="input-text" dense readonly></input>
+                            </div>
+                        </div>
+                </div>
+                <div className="form-section-style">
+                    <h1>⑦ 就學研究計畫<span className="red-words">（無則免填）</span></h1>
                     <div className="grid-section">
                             <div>
                                 <h2>准考證號碼</h2>
