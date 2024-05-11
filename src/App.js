@@ -8,6 +8,7 @@ import Check from './components/Check';
 import CheckForm from './components/CheckForm'; 
 import Password from './components/Password'; 
 import DnD from './components/DnD';
+import Admin from './components/Admin';
 import './App.css'
 import {NextUIProvider} from "@nextui-org/react";
 
@@ -17,6 +18,7 @@ function App() {
     <NextUIProvider>
       <Router>
         <Routes >
+          <Route path="/admin" element={<Admin />} />
           <Route path="/dnd" element={<DnD />} />
           <Route path="/check-form" element={<CheckForm />} />
           <Route path="/check" element={<Check />} />
