@@ -29,32 +29,34 @@ function Login() {
         alert("login");
     };
     return (
-        <div class="container mx-auto flex flex-col ">
-          <div class="w-full flex-col flex ">
+        <div class="container mx-auto flex flex-col w-full">
+          
             <StudentHeader></StudentHeader>
-            <h1 class="text-center text-3xl font-bold text-gray-800" >登入使用<span class="text-red-500">（請先新增帳號）</span></h1>
-            <input
-                type="text"
-                name="ID"
-                value={user.ID}
-                onChange={handleInputChange}
-                placeholder="Email"
-                class="block w-1/2 my-2 p-1 border border-gray-300 bg-white"
-            />
-            <input
-                type="password"
-                name="password"
-                value={user.password}
-                onChange={handleInputChange}
-                placeholder="密碼"
-                class="block w-1/2 my-2 p-1 border border-gray-300 bg-white"
-            />
-            <div class="flex flex-row justify-center items-center mt-4">
-                <div>
-                  <Link to="/password"><p>忘記密碼</p></Link>
-                  <Link to="/register"><button class="rounded-full text-white py-2 w-5/12 mx-2 bg-primary ">新增帳號</button></Link>
+            <h1 class="text-center text-3xl font-bold text-gray-800 mt-12" >登入使用<span class="text-red-500">（請先新增帳號）</span></h1>
+            <div class="flex flex-col justify-center items-center">
+              <input
+                  type="text"
+                  name="ID"
+                  value={user.ID}
+                  onChange={handleInputChange}
+                  placeholder="Email"
+                  class="block w-1/2 my-2 p-1 border border-gray-300 bg-white"
+              />
+              <input
+                  type="password"
+                  name="password"
+                  value={user.password}
+                  onChange={handleInputChange}
+                  placeholder="密碼"
+                  class="block w-1/2 my-2 p-1 border border-gray-300 bg-white"
+              />
+            </div>
+            <div class="flex flex-row justify-center items-center mt-4 my-5">
+                <div class="flex flex-col justify-center items-center">
+                  <Link to="/password"><p class="my-3">忘記密碼</p></Link>
+                  <Link to="/register"><button class="rounded-full text-white py-2 w-72 mx-2 bg-primary ">新增帳號</button></Link>
                 </div>
-                <button onClick={login} class="rounded-full text-white py-2 w-5/12 mx-2 bg-secondary">登入</button>
+                <button onClick={login} class="rounded-full text-white py-2 w-72 mx-2 mt-12 bg-secondary">登入</button>
             </div>
             <div align="center">
               <span class="style18">申請報名登錄時間：113 年 1 月 11 日（四）至 1 月 25 日（四）下午5時止</span>
@@ -71,7 +73,6 @@ function Login() {
                 
             </div>
             <StudentFooter></StudentFooter>
-          </div>
         </div>
         
           

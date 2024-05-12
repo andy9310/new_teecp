@@ -25,11 +25,11 @@ function DnD(){
         console.log('Dragged from index', event.detail.from, 'to', event.detail.to); // debugv0.1.0
 
         event.detail.complete();
-      }
+    }
     
-      function toggleReorder() {
+    function toggleReorder() {
         setIsDisabled((current_state) => !current_state);
-      }
+    }
     return (
         <div class="container mx-auto flex flex-col w-full">
             <CheckHeader></CheckHeader>
