@@ -3,7 +3,8 @@ import './Register.css';
 import Check from "../images/check.png";
 import C from "../images/C.png";
 import { Link } from 'react-router-dom';
-
+import StudentHeader from '../side_components/studentside_header';
+import StudentFooter from '../side_components/studentside_footer';
 function Register() {
     const[url,setUrl] = useState('/login');
     const [user, setUser] = useState({
@@ -51,62 +52,73 @@ function Register() {
     };
 
     return (
-        <div>
-            <div className="student-sign">
-                <img src={C} />
-                <div className="inline-block text-left align-middle font-bold">
-                    <p className="text-4xl">報名端</p>
-                    <p className="text-xl">Registration</p>
+        <div class="container mx-auto flex flex-col w-full">
+            <StudentHeader></StudentHeader>
+            <div class="mt-14 text-center mt-4 mb-4 flex flex-row justify-center">
+                <img class="relative inline h-28 mr-4" src={C} />
+                <div class="mt-4 inline-block text-left align-middle font-bold">
+                    <p class="text-4xl">報名端</p>
+                    <p class="text-xl">Registration</p>
                 </div>
             </div>
-        <form onSubmit={handleSubmit} className="register-form">
-        <h1>註冊帳號</h1>
-        <input
-            type="text"
-            name="identity"
-            value={user.identity}
-            onChange={handleChange}
-            required
-            placeholder="姓名"
-        />
-        <input
-            type="email"
-            name="ID"
-            value={user.ID}
-            onChange={handleChange}
-            required
-            placeholder="Email"
-        />
-        <input
-            type="password"
-            name="password"
-            value={user.password}
-            onChange={handleChange}
-            required
-            placeholder="密碼"
-            pattern="[a-z0-9]{8,}"
-        />
-        <input
-            type="password"
-            name="passwordConfirm"
-            value={user.passwordConfirm}
-            onChange={handleChange}
-            required
-            placeholder="確認密碼"
-            pattern="[a-z0-9]{8,}"
-        />
-        {user.password !== user.passwordConfirm && (
-            <div>× 兩次輸入密碼不一致<br /></div>
-        )}
-        <div>
-            <img src={Check} alt="Check" /> 帳號請使用電子郵件帳號<br />
-            <img src={Check} alt="Check" /> 密碼至少設定 8 個字元<br />
-            <img src={Check} alt="Check" /> 密碼由小寫英文字母或數字等字元組成<br />
-        </div>
-        <p>
-            <Link to={url}><button type="submit" onClick={registerCheck}>新增帳號</button></Link>
-        </p>
-        </form>
+            <form onSubmit={handleSubmit} class="w-1/2 mx-auto my-8 text-center items-center">
+                <h1>註冊帳號</h1>
+                <input
+                    type="text"
+                    name="identity"
+                    value={user.identity}
+                    onChange={handleChange}
+                    required
+                    placeholder="姓名"
+                    class="block w-full my-2 p-1 border border-gray-300 bg-white"
+                />
+                <input
+                    type="email"
+                    name="ID"
+                    value={user.ID}
+                    onChange={handleChange}
+                    required
+                    placeholder="Email"
+                    class="block w-full my-2 p-1 border border-gray-300 bg-white"
+                />
+                <input
+                    type="password"
+                    name="password"
+                    value={user.password}
+                    onChange={handleChange}
+                    required
+                    placeholder="密碼"
+                    pattern="[a-z0-9]{8,}"
+                    class="block w-full my-2 p-1 border border-gray-300 bg-white"
+                />
+                <input
+                    type="password"
+                    name="passwordConfirm"
+                    value={user.passwordConfirm}
+                    onChange={handleChange}
+                    required
+                    placeholder="確認密碼"
+                    pattern="[a-z0-9]{8,}"
+                    class="block w-full my-2 p-1 border border-gray-300 bg-white"
+                />
+            </form>
+            {user.password !== user.passwordConfirm && (
+                <div>× 兩次輸入密碼不一致<br /></div>
+            )}
+            <div class="flex flex-col">
+                <div class="flex flex-row ">
+                    <img class="w-5 h-5" src={Check} alt="Check" /> 帳號請使用電子郵件帳號<br />
+                </div>
+                <div class="flex flex-row ">
+                    <img class="w-5 h-5" src={Check} alt="Check" /> 密碼至少設定 8 個字元<br />
+                </div>
+                <div class="flex flex-row ">
+                    <img class="w-5 h-5" src={Check} alt="Check" /> 密碼由小寫英文字母或數字等字元組成<br />
+                </div>
+            </div>
+            <p class="items-center text-center">
+                <Link to={url}><button type="submit" class="bg-primary text-white rounded-full w-60 py-1" onClick={registerCheck}>新增帳號</button></Link>
+            </p>
             <div align="left">
                     <p class="style1"><strong>【個資宣告】 </strong></p>
                     <ul>
@@ -117,6 +129,7 @@ function Register() {
                         </li>
                     </ul>
             </div>
+            <StudentFooter></StudentFooter>
         </div>
     );
 }

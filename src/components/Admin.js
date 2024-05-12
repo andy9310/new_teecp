@@ -1,5 +1,4 @@
 import React, { useState, useContext } from 'react';
-import './User.css';
 import checkboard from "../images/3C.png";
 import accountManage from "../images/3B.png";
 import system from "../images/3E.png";

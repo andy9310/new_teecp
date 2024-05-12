@@ -3,6 +3,8 @@ import './UserForm.css';
 import studentboard from "../images/3D.png";
 import C from "../images/C.png";
 import { Link } from 'react-router-dom';
+import StudentHeader from '../side_components/studentside_header';
+import StudentFooter from '../side_components/studentside_footer';
 
 function UserForm() {
     const [time, setTime] = useState(Date.now);
@@ -12,7 +14,8 @@ function UserForm() {
         alert("submit");
     };
     return (
-        <>  
+        <div class="container mx-auto flex flex-col w-full"> 
+            <StudentHeader></StudentHeader>
             <div className="form-board">
                 <div className="alert success">
                     上次自動儲存時間：{time}
@@ -429,7 +432,8 @@ function UserForm() {
             
             {/* <Document v-show="printing" :ID="ID" class="printable" ref="document" :form="form"></Document> */}
             </div>
-        </>
+            <StudentFooter></StudentFooter>
+        </div>
         
           
     );

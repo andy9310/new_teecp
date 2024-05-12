@@ -1,5 +1,4 @@
 import React, { useState, useContext } from 'react';
-import './User.css';
 import AdminHeader from '../side_components/adminside_header';
 import AdminFooter from '../side_components/adminside_footer';
 import {Reorder, useMotionValue} from 'framer-motion'
