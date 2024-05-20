@@ -1,18 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import './Register.css';
 import Check from "../images/check.png";
 import C from "../images/C.png";
 import { Link } from 'react-router-dom';
+import { GlobalContext } from '../context/global';
 import StudentHeader from '../side_components/studentside_header';
 import StudentFooter from '../side_components/studentside_footer';
+
 function Register() {
-    const[url,setUrl] = useState('/login');
+    const { url } = useContext(GlobalContext);
     const [user, setUser] = useState({
         identity: '',
         ID: '',
         password: '',
         passwordConfirm: ''
     });
+    const register=()=>{
+        let request_body = {
+            "name": user.identity,
+            "email": user.ID,
+            "password": user.password,
+            "student": {
+              "studentNumber": "string"
+            }
+        }
+        let registerHeader = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            // "Authorization": `Bearer ${token}`,
+        }
+        const requestOptions = {
+            method: "POST",
+            headers: registerHeader,
+            redirect: "follow",
+            body: JSON.stringify(request_body)
+            }
+        fetch(url+'/register',requestOptions)
+        .then((response)=>{
+            // alert(response);
+            // deal with 
+        })
+        .then((result)=>console.log(result))
+        .catch((error)=>{
+            alert("register error");
+            console.error(error);
+        });
+    };
     const registerCheck = () => {
         const email_format = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
         const password_format = /^[a-z0-9]+$/;
@@ -30,6 +63,7 @@ function Register() {
             window.location.reload();
         }
         else{
+            register();
             alert("註冊成功，可以登入了");
         }
         
@@ -43,11 +77,10 @@ function Register() {
         e.preventDefault();
         // check for submit 
         if (user.password !== user.passwordConfirm) {
-        alert("Passwords do not match.");
-        setUrl('/register')
-        return;
+            alert("Passwords do not match.");
+            // setUrl('/register')
+            return;
         }
-        
         console.log('User registered:', user);
     };
 
@@ -117,7 +150,7 @@ function Register() {
                 </div>
             </div>
             <p class="items-center text-center">
-                <Link to={url}><button type="submit" class="bg-primary text-white rounded-full w-60 py-1" onClick={registerCheck}>新增帳號</button></Link>
+                <Link to='/login'><button type="submit" class="bg-primary text-white rounded-full w-60 py-1" onClick={registerCheck}>新增帳號</button></Link>
             </p>
             <div align="left">
                     <p class="style1"><strong>【個資宣告】 </strong></p>

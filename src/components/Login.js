@@ -1,8 +1,10 @@
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { redirect, useNavigate } from 'react-router-dom';
 // import './Login.css';
 // import { useNavigate } from 'react-router-dom';
+import { GlobalContext } from '../context/global';
+
 import StudentHeader from '../side_components/studentside_header';
 import StudentFooter from '../side_components/studentside_footer';
 
@@ -10,6 +12,7 @@ import StudentFooter from '../side_components/studentside_footer';
 import { Link } from 'react-router-dom';
 
 function Login() {
+    const { url,setUserName,userName } = useContext(GlobalContext);
     const [user, setUser] = useState({ ID: '', password: '' });
     const navigate = useNavigate();
     const handleInputChange = (e) => {
@@ -17,16 +20,62 @@ function Login() {
         setUser({ ...user, [name]: value });
     };
 
-    const login = () => { // check login 
-        // Login logic here
-        if(user.ID == 'admin' && user.password == 'admin'){
-          navigate('/check');
+    const login = async() => { // check login 
+        let jwt_token = "";
+        let request_body = {
+          "email":user.ID,
+          "password":user.password
         }
-        else{
-          navigate('/user');
+        // post login infor
+        let loginHeader = {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          // "Authorization": `Bearer ${token}`,
         }
+        const requestOptions = {
+          method: "POST",
+          headers: loginHeader,
+          redirect: "follow",
+          body: JSON.stringify(request_body)
+        }
+        if(user.ID !== "" && user.password !== ""){
+          await fetch(url+'/login',requestOptions)
+          .then((response)=>{
+            if(response.status == "200"){
+              response.text().then(text => {
+                console.log(JSON.parse(text)['token']);  // important
+              })
+              setUserName("楊鈞安"); // important
+              alert("user login success");
+              navigate('/user');
+            }
+            else{
+              alert("user login failed");
+            }
+            
+            //jwt_token = response["token"];
+            //alert(jwt_token);
+          })
+          .then((result)=>console.log(result))
+          .catch((error)=>{
+            alert("login error");
+            console.error(error);
+          });
+        }
+        else if(user.ID === ""){
+          alert("請輸入信箱");
+        }
+        else if(user.password === ""){
+          alert("請輸入密碼");
+        }
+        // Login logic heres
+        // if(jwt_token == 'admin'){
+        //   navigate('/check');
+        // }
+        // else{
+        //   navigate('/user');
+        // }
         //
-        alert("login");
     };
     return (
         <div class="container mx-auto flex flex-col w-full">
@@ -35,6 +84,7 @@ function Login() {
             <h1 class="text-center text-3xl font-bold text-gray-800 mt-12" >登入使用<span class="text-red-500">（請先新增帳號）</span></h1>
             <div class="flex flex-col justify-center items-center">
               <input
+                  required
                   type="text"
                   name="ID"
                   value={user.ID}
@@ -43,6 +93,7 @@ function Login() {
                   class="block w-1/2 my-2 p-1 border border-gray-300 bg-white"
               />
               <input
+                  required
                   type="password"
                   name="password"
                   value={user.password}

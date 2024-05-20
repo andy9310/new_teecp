@@ -4,6 +4,7 @@ import accountManage from "../images/3B.png";
 import system from "../images/3E.png";
 import C from "../images/C.png";
 import { Link } from 'react-router-dom';
+import Status from './status';
 import AdminHeader from '../side_components/adminside_header';
 import AdminFooter from '../side_components/adminside_footer';
 
@@ -12,12 +13,13 @@ function Admin() {
     return (
         <div class="container mx-auto flex flex-col w-full">
             <AdminHeader></AdminHeader>
-            <div class="mt-14 text-center mt-4 mb-4 flex flex-row justify-center">
+            <div class="mt-14 text-center mt-4 mb-4 flex flex-row justify-center relative">
                 <img class="relative inline h-28 mr-4" src={C} />
                 <div class="mt-4 inline-block text-left align-middle font-bold">
                     <p class="text-4xl">管理端</p>
                     <p class="text-xl">Review</p>
                 </div>
+                <Status></Status>
             </div>
             <div class="flex flex-row justify-evenly mt-20">
                 <Link to="/admin-score">

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Table } from "reactstrap";
 import { useRaisedShadow } from "../side_components/use-raised-shadow";
 import {Card, CardBody,Button} from "@nextui-org/react"; // use Nextui as 
+import Status from './status';
 import CheckHeader from '../side_components/checkside_header';
 import CheckFooter from '../side_components/checkside_footer';
 import {
@@ -33,13 +34,15 @@ function DnD(){
     return (
         <div class="container mx-auto flex flex-col w-full">
             <CheckHeader></CheckHeader>
-            <div align="left">
+            
+            <div align="left" class="relative">
               <p class="text-red-500"><strong>【審查開放時間:113年2月6日至113年6月1日(六)上午12時止】 </strong></p>
               <p><strong>【書面審查評分方式】 </strong></p>
               <ul>
                   <li class="style1">1.請以序號1~4表示推薦錄取名次等級，排名評分為【1】者表極力推薦優先錄取</li>
                   <li class="style1">2.專案A有{A_items.length}名學生申請，專案B有{B_items.length}名學生申請，每個等級可推薦一名(依指導意願排序)</li>
               </ul>
+              <Status></Status>
             </div>
             <div class="flex flex-row justify-evenly items-center mt-2"> 
                 

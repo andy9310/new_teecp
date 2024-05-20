@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import AdminHeader from '../side_components/adminside_header';
 import AdminFooter from '../side_components/adminside_footer';
 import {Reorder, useMotionValue} from 'framer-motion'
@@ -13,6 +13,7 @@ import lock from "../images/lock.svg";
 import trash from "../images/trash.svg";
 import pen from "../images/pen.svg";
 import { Button,Modal} from 'react-bootstrap'; 
+import { GlobalContext } from '../context/global';
 
 function Account(){
     const [professor_items, setProfessorItems] = useState([[1,2],[1,2],[1,2],[1,2]]);
@@ -21,6 +22,9 @@ function Account(){
     const [addstatus_one, setAddStatus_one] = useState(false);
     const [addstatus_two, setAddStatus_two] = useState(false);
     const [revisestatus, setReviseStatus] = useState(false);
+    const [getAll, setGetAll] = useState(0);
+    const { url } = useContext(GlobalContext);
+
     const numbers = [1,2,3,4,5];
     const add_board_one = ()=>{
         setAddStatus_one(!addstatus_one);
@@ -34,6 +38,135 @@ function Account(){
     const handleClose = ()=>{
         setAddStatus_one(false);
     }
+    const create = async() => {
+        let request_body = {
+            "email":null,
+            "password":null,
+            "name":null,
+            "manager":null
+        }
+        let createHeader = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            // "Authorization": `Bearer ${token}`,
+        }
+        const requestOptions = {
+            method: "POST",
+            headers: createHeader,
+            redirect: "follow",
+        }
+        await fetch(url+'/user/',requestOptions)
+        .then((response)=>{
+            if(response.status == "200"){
+                response.text().then(text => {
+                    console.log(JSON.parse(text));  
+                    // TODO
+                })
+            }
+            else{
+                alert("create user failed");
+            }
+        })
+        .then((result)=>console.log(result))
+        .catch((error)=>{
+            alert("create user error");
+            console.error(error);
+        });
+    }
+    const revise = async(user_id, option) => {
+        let request_body = {
+          "userid":user_id,
+        }
+        let Header = {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          // "Authorization": `Bearer ${token}`,
+        }
+        if(option === 0){ // delete account
+            const requestOptions = {
+                method: "DELETE",
+                headers: Header,
+                redirect: "follow",
+                body: JSON.stringify(request_body)
+            }
+            await fetch(url+'/user/:'+user_id ,requestOptions)
+            .then((response)=>{
+                if(response.status == "200"){
+                response.text().then(text => {
+                    console.log(JSON.parse(text));  
+                })
+                
+                }
+                else{
+                    alert("delete user failed");
+                }
+            })
+            .then((result)=>console.log(result))
+            .catch((error)=>{
+                alert("delete user error");
+                console.error(error);
+            });
+        }
+        else{ // revise account
+            const requestOptions = {
+                method: "PATCH",
+                headers: Header,
+                redirect: "follow",
+                body: JSON.stringify(request_body)
+            }
+            await fetch(url+'/user/:'+user_id ,requestOptions)
+            .then((response)=>{
+                if(response.status == "200"){
+                response.text().then(text => {
+                    console.log(JSON.parse(text));  
+                })
+                
+                }
+                else{
+                    alert("revise user failed");
+                }
+            })
+            .then((result)=>console.log(result))
+            .catch((error)=>{
+                alert("revise user error");
+                console.error(error);
+            });
+        }
+    }
+    const get_all_user = async() =>{
+        let getHeader = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            // "Authorization": `Bearer ${token}`,
+        }
+        const requestOptions = {
+            method: "GET",
+            headers: getHeader,
+            redirect: "follow",
+        }
+        await fetch(url+'/user/',requestOptions)
+        .then((response)=>{
+            if(response.status == "200"){
+                response.text().then(text => {
+                    console.log(JSON.parse(text));  
+                    // TODO
+                })
+            }
+            else{
+                alert("get user failed");
+            }
+        })
+        .then((result)=>console.log(result))
+        .catch((error)=>{
+            alert("get user error");
+            console.error(error);
+        });
+    }
+    // effect 
+    useEffect(()=>{
+        get_all_user();
+      },[getAll])
+
     return(
         <>
         {addstatus_one?
@@ -227,7 +360,6 @@ function Account(){
                     <div class="flex flex-row justify-between">
                         <h1 class="font-bold mt-6 mx-6">學生帳號管理</h1>
                         <div>
-                            <button class="mt-6 mx-3 border bg-primary w-16 rounded-lg text-white" >新增</button>
                             <button class="mt-6 mx-3 border w-12 bg-primary rounded-full"><ion-icon src={search}></ion-icon></button>
                         </div>
                     </div>

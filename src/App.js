@@ -13,12 +13,14 @@ import AdminScore from './components/AdminScore';
 import AdminForm from './components/AdminForm';
 import Account from './components/Account';
 import System from './components/System';
+import GlobalContextProvider from './context/global.js' 
 import './App.css'
 import {NextUIProvider} from "@nextui-org/react";
 
 
 function App() {
   return (
+    <GlobalContextProvider>
     <NextUIProvider>
       <Router>
         <Routes >
@@ -39,6 +41,7 @@ function App() {
         </Routes>
       </Router>
     </NextUIProvider>
+    </GlobalContextProvider>
   );
 }
 

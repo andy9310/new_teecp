@@ -2,19 +2,22 @@ import React, { useState, useContext } from 'react';
 import studentboard from "../images/3D.png";
 import C from "../images/C.png";
 import { Link } from 'react-router-dom';
+import { GlobalContext } from '../context/global';
 import StudentHeader from '../side_components/studentside_header';
 import StudentFooter from '../side_components/studentside_footer';
+import Status from './status';
 function User() {
-    
     return (
       <div class="container mx-auto flex flex-col w-full">
             <StudentHeader></StudentHeader>
-            <div class="mt-14 text-center mt-4 mb-4 flex flex-row justify-center">
+            <div class="mt-14 text-center mt-4 mb-4 flex flex-row justify-center relative">
+              
                 <img class="relative inline h-28 mr-4" src={C} />
                 <div class="mt-4 inline-block text-left align-middle font-bold">
                     <p class="text-4xl">報名端</p>
                     <p class="text-xl">Registration</p>
                 </div>
+                <Status></Status>
             </div>
             <div class="flex flex-row justify-evenly my-20">
               <Link to="/user-form">
