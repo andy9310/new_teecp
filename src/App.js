@@ -14,13 +14,16 @@ import AdminForm from './components/AdminForm';
 import Account from './components/Account';
 import System from './components/System';
 import GlobalContextProvider from './context/global.js' 
+import { SessionProvider } from './context/session.js' 
 import './App.css'
 import {NextUIProvider} from "@nextui-org/react";
 
 
 function App() {
   return (
+    
     <GlobalContextProvider>
+    <SessionProvider>
     <NextUIProvider>
       <Router>
         <Routes >
@@ -41,6 +44,7 @@ function App() {
         </Routes>
       </Router>
     </NextUIProvider>
+    </SessionProvider>
     </GlobalContextProvider>
   );
 }

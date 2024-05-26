@@ -1,6 +1,8 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext,useEffect } from 'react';
+import { redirect, useNavigate } from 'react-router-dom';
 import './Register.css';
 import Check from "../images/check.png";
+import CheckIon from "../images/check-ion.svg";
 import C from "../images/C.png";
 import { Link } from 'react-router-dom';
 import { GlobalContext } from '../context/global';
@@ -8,26 +10,34 @@ import StudentHeader from '../side_components/studentside_header';
 import StudentFooter from '../side_components/studentside_footer';
 
 function Register() {
+    const navigate = useNavigate();
     const { url } = useContext(GlobalContext);
+    const [check_email, setCheckEmail] = useState(false);
+    const [check_plen, setCheckPlen] = useState(false);
+    const [check_pformat, setCheckPformat] = useState(false);
+    const [check_studentNumber, setStudentNumber] = useState(false);
+
     const [user, setUser] = useState({
-        identity: '',
-        ID: '',
+        name: '',
+        email: '',
+        studentNumber: '',
         password: '',
         passwordConfirm: ''
     });
-    const register=()=>{
+
+    const register=async()=>{
+        
         let request_body = {
-            "name": user.identity,
-            "email": user.ID,
+            "name": user.name,
+            "account": user.email,
             "password": user.password,
             "student": {
-              "studentNumber": "string"
+              "studentNumber": user.studentNumber,
             }
         }
         let registerHeader = {
             "Content-Type": "application/json",
             "Accept": "application/json",
-            // "Authorization": `Bearer ${token}`,
         }
         const requestOptions = {
             method: "POST",
@@ -35,10 +45,16 @@ function Register() {
             redirect: "follow",
             body: JSON.stringify(request_body)
             }
-        fetch(url+'/register',requestOptions)
+        await fetch(url+'/auth/register',requestOptions)
         .then((response)=>{
-            // alert(response);
-            // deal with 
+            if(response.status === 200){
+                alert("註冊成功，可以登入了");
+                navigate('./login');
+            }
+            else{
+                alert("註冊失敗，帳號已存在");
+                window.location.reload();
+            }
         })
         .then((result)=>console.log(result))
         .catch((error)=>{
@@ -54,17 +70,17 @@ function Register() {
             alert("Passwords do not match.");
             window.location.reload();
         }
-        else if(!email_format.test(user.ID)){
-            alert("資料格式錯誤");
+        else if(!email_format.test(user.email)){
+            alert("信箱資料格式錯誤");
             window.location.reload();
         }
         else if( user.password.length < 8 || !password_format.test(user.password)){
-            alert("資料格式錯誤");
+            alert("密碼資料格式錯誤");
             window.location.reload();
         }
         else{
             register();
-            alert("註冊成功，可以登入了");
+            
         }
         
     };
@@ -72,17 +88,28 @@ function Register() {
         const { name, value } = e.target;
         setUser(prev => ({ ...prev, [name]: value }));
     };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        // check for submit 
-        if (user.password !== user.passwordConfirm) {
-            alert("Passwords do not match.");
-            // setUrl('/register')
-            return;
+    useEffect(()=>{
+        const email_format = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+        const password_format = /^[a-z0-9]+$/;
+        if(!email_format.test(user.email)){
+            setCheckEmail(false);
         }
-        console.log('User registered:', user);
-    };
+        else{
+            setCheckEmail(true);
+        }
+        if( user.password.length < 8){
+            setCheckPlen(false);
+        }
+        else{
+            setCheckPlen(true);
+        }
+        if(!password_format.test(user.password)){
+            setCheckPformat(false);
+        }
+        else{
+            setCheckPformat(true);
+        }
+    },[user]);
 
     return (
         <div class="container mx-auto flex flex-col w-full">
@@ -94,12 +121,12 @@ function Register() {
                     <p class="text-xl">Registration</p>
                 </div>
             </div>
-            <form onSubmit={handleSubmit} class="w-1/2 mx-auto my-8 text-center items-center">
+            <form class="w-1/2 mx-auto my-8 text-center items-center">
                 <h1>註冊帳號</h1>
                 <input
                     type="text"
-                    name="identity"
-                    value={user.identity}
+                    name="name"
+                    value={user.name}
                     onChange={handleChange}
                     required
                     placeholder="姓名"
@@ -107,11 +134,21 @@ function Register() {
                 />
                 <input
                     type="email"
-                    name="ID"
-                    value={user.ID}
+                    name="email"
+                    value={user.email}
                     onChange={handleChange}
                     required
                     placeholder="Email"
+                    class="block w-full my-2 p-1 border border-gray-300 bg-white"
+                />
+                <input
+                    type="password"
+                    name="studentNumber"
+                    value={user.studentNumber}
+                    onChange={handleChange}
+                    required
+                    placeholder="學號/准考證號碼"
+                    pattern="[a-z0-9]{8,}"
                     class="block w-full my-2 p-1 border border-gray-300 bg-white"
                 />
                 <input
@@ -140,17 +177,30 @@ function Register() {
             )}
             <div class="flex flex-col">
                 <div class="flex flex-row ">
-                    <img class="w-5 h-5" src={Check} alt="Check" /> 帳號請使用電子郵件帳號<br />
+                    {
+                        check_email?<ion-icon class="text-[#22c55e] text-xl"  src={CheckIon}></ion-icon>:
+                        <ion-icon class="text-[#9ca3af] text-xl"  src={CheckIon}></ion-icon>
+                    }
+                     
+                    信箱請使用合格電子郵件帳號<br />
                 </div>
                 <div class="flex flex-row ">
-                    <img class="w-5 h-5" src={Check} alt="Check" /> 密碼至少設定 8 個字元<br />
+                    {
+                        check_plen?<ion-icon class="text-[#22c55e] text-xl"  src={CheckIon}></ion-icon>:
+                        <ion-icon class="text-[#9ca3af] text-xl"  src={CheckIon}></ion-icon>
+                    }
+                    密碼至少設定 8 個字元<br />
                 </div>
                 <div class="flex flex-row ">
-                    <img class="w-5 h-5" src={Check} alt="Check" /> 密碼由小寫英文字母或數字等字元組成<br />
+                    {
+                        check_pformat?<ion-icon class="text-[#22c55e] text-xl"  src={CheckIon}></ion-icon>:
+                        <ion-icon class="text-[#9ca3af] text-xl"  src={CheckIon}></ion-icon>
+                    } 
+                    密碼由小寫英文字母或數字等字元組成<br />
                 </div>
             </div>
             <p class="items-center text-center">
-                <Link to='/login'><button type="submit" class="bg-primary text-white rounded-full w-60 py-1" onClick={registerCheck}>新增帳號</button></Link>
+                <button type="submit" class="bg-primary text-white rounded-full w-60 py-1" onClick={registerCheck}>新增帳號</button>
             </p>
             <div align="left">
                     <p class="style1"><strong>【個資宣告】 </strong></p>

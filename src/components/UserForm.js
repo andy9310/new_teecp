@@ -8,7 +8,12 @@ import { Link } from 'react-router-dom';
 import StudentHeader from '../side_components/studentside_header';
 import StudentFooter from '../side_components/studentside_footer';
 import Status from './status';
+import { useSession } from '../context/session';
+import { GlobalContext } from '../context/global';
+
 function UserForm() {
+    const { url } = useContext(GlobalContext);
+    const { user_session, userId } = useSession();
     const year = new Date().getFullYear();
     const month = ('0' + (new Date().getMonth() + 1)).slice(-2);
     const day = ('0' + new Date().getDate()).slice(-2);
@@ -37,10 +42,38 @@ function UserForm() {
           setFile(reader.result);
         };
         return reader.result;
-        reader.onerror = function (error) {
-          console.log('Error: ', error);
-        };
     }
+    
+    const getStoredData = async() => {
+        let getHeader = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": `Bearer ${user_session}`,
+        }
+        const requestOptions = {
+            method: "GET",
+            headers: getHeader,
+            redirect: "follow",
+        }
+        await fetch(url+'/application/'+{userId},requestOptions)
+        .then((response)=>{
+            if(response.status == "200"){
+                response.text().then(text => {
+                    //console.log(JSON.parse(text)['name']);  // important
+                    
+                })
+                alert("fetch stored application data success");
+            }
+            else{
+                alert("fetch stored application data failed");
+            }
+        })
+        .then((result)=>console.log(result))
+        .catch((error)=>{
+            alert("get application :id error");
+            console.error(error);
+        });
+    };
     const submitForm = () => {
         if(window.confirm("一經送出即無法修改，您確定要送出了?")){
             setPrint(false);

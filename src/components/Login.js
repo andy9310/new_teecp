@@ -4,6 +4,7 @@ import { redirect, useNavigate } from 'react-router-dom';
 // import './Login.css';
 // import { useNavigate } from 'react-router-dom';
 import { GlobalContext } from '../context/global';
+import { SessionProvider, useSession } from '../context/session';
 
 import StudentHeader from '../side_components/studentside_header';
 import StudentFooter from '../side_components/studentside_footer';
@@ -12,8 +13,10 @@ import StudentFooter from '../side_components/studentside_footer';
 import { Link } from 'react-router-dom';
 
 function Login() {
-    const { url,setUserName,userName } = useContext(GlobalContext);
-    const [user, setUser] = useState({ ID: '', password: '' });
+    const { url } = useContext(GlobalContext);
+    const { user_session, session_logout, session_login, userName, setUserName } = useSession();
+
+    const [user, setUser] = useState({ email: '', password: '' });
     const navigate = useNavigate();
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -21,9 +24,8 @@ function Login() {
     };
 
     const login = async() => { // check login 
-        let jwt_token = "";
         let request_body = {
-          "email":user.ID,
+          "account":user.email,
           "password":user.password
         }
         // post login infor
@@ -38,23 +40,20 @@ function Login() {
           redirect: "follow",
           body: JSON.stringify(request_body)
         }
-        if(user.ID !== "" && user.password !== ""){
-          await fetch(url+'/login',requestOptions)
+        if(user.email !== "" && user.password !== ""){
+          await fetch(url+'/auth/login',requestOptions)
           .then((response)=>{
             if(response.status == "200"){
               response.text().then(text => {
-                console.log(JSON.parse(text)['token']);  // important
+                console.log(JSON.parse(text)['jwt_token']);  // important
+                session_login(JSON.parse(text)['jwt_token']);
               })
-              setUserName("楊鈞安"); // important
               alert("user login success");
               navigate('/user');
             }
             else{
               alert("user login failed");
             }
-            
-            //jwt_token = response["token"];
-            //alert(jwt_token);
           })
           .then((result)=>console.log(result))
           .catch((error)=>{
@@ -62,7 +61,7 @@ function Login() {
             console.error(error);
           });
         }
-        else if(user.ID === ""){
+        else if(user.email === ""){
           alert("請輸入信箱");
         }
         else if(user.password === ""){
@@ -86,8 +85,8 @@ function Login() {
               <input
                   required
                   type="text"
-                  name="ID"
-                  value={user.ID}
+                  name="email"
+                  value={user.email}
                   onChange={handleInputChange}
                   placeholder="Email"
                   class="block w-1/2 my-2 p-1 border border-gray-300 bg-white"
