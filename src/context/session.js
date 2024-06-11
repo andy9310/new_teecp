@@ -7,9 +7,14 @@ export const useSession = () => useContext(SessionContext);
 export const SessionProvider = ({ children }) => {
     const { url } = useContext(GlobalContext);
     const [user_session, setUserSession] = useState(null);
+    const [userType, setUserType] = useState(null); // 'manager', 'student', 'reviewer'
     const [userName, setUserName] = useState('使用者');
+    // const [id, setId] = useState(null);
     const [userId, setUserId] = useState(null);
-
+    const [studentNumber, setStudentNumber] = useState(null);
+    const [reviewerInfo, setReviewerInfo] = useState({});
+    
+    // website storage
     useEffect(() => {
         const sessionUser = getSession('user');
         if (sessionUser) {
@@ -18,8 +23,7 @@ export const SessionProvider = ({ children }) => {
     }, []);
 
     const session_login = async(session) => {
-        const userDetails = { session };
-        setUserSession(userDetails);
+        setUserSession(session);
         let getHeader = {
             "Content-Type": "application/json",
             "Accept": "application/json",
@@ -31,33 +35,45 @@ export const SessionProvider = ({ children }) => {
             redirect: "follow",
         }
         await fetch(url+'/user/me',requestOptions)
-        .then((response)=>{
+        .then(async(response)=>{
             if(response.status == "200"){
-                response.text().then(text => {
-                    console.log(JSON.parse(text)['name']);  // important
+                await response.text().then( (text) => {
                     setUserName(JSON.parse(text)['name']);
-                    setUserId(JSON.parse(text)['id']);
+                    // setId(JSON.parse(text)['id']);
+                    if(JSON.parse(text)['manager']){
+                        setUserType('manager');
+                    }
+                    else if(JSON.parse(text)['student']['studentNumber'] !== ''){
+                        setUserType('student');
+                        setStudentNumber(JSON.parse(text)['student']['studentNumber']);
+                        setUserId(JSON.parse(text)['id']);
+                    }
+                    else{
+                        setUserType('reviewer');
+                        setReviewerInfo(JSON.parse(text)['reviewer']);
+                    }
+                    
                 })
-                alert("fetch user session success");
             }
             else{
                 alert("fetch user session failed");
             }
         })
-        .then((result)=>console.log(result))
+        .then((result)=>{return result;})
         .catch((error)=>{
             alert("get user me error");
             console.error(error);
         });
-        saveSession('user', userDetails);
+        saveSession('user', session);
     };
 
     const session_logout = () => {
         setUserSession(null);
+        setUserType(null);
         clearSession('user');
     };
     return (
-        <SessionContext.Provider value={{ user_session, session_login, session_logout, userName, setUserName, userId }}>
+        <SessionContext.Provider value={{ user_session, session_login, session_logout, userName, setUserName, userId, studentNumber, userType }}>
         {children}
         </SessionContext.Provider>
     );

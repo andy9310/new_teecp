@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 import { redirect, useNavigate } from 'react-router-dom';
 // import './Login.css';
@@ -14,7 +14,7 @@ import { Link } from 'react-router-dom';
 
 function Login() {
     const { url } = useContext(GlobalContext);
-    const { user_session, session_logout, session_login, userName, setUserName } = useSession();
+    const { user_session, session_logout, session_login, userName, setUserName, userType } = useSession();
 
     const [user, setUser] = useState({ email: '', password: '' });
     const navigate = useNavigate();
@@ -22,7 +22,20 @@ function Login() {
         const { name, value } = e.target;
         setUser({ ...user, [name]: value });
     };
-
+    useEffect(()=>{
+      if(userType === 'student'){
+        navigate('/user');
+      }
+      else if(userType === 'manager'){
+        navigate('/admin');
+      }
+      else if(userType === 'reviewer'){
+        navigate('/check');
+      }
+      else{
+        navigate('/login')
+      }
+    },[userType])
     const login = async() => { // check login 
         let request_body = {
           "account":user.email,
@@ -44,12 +57,13 @@ function Login() {
           await fetch(url+'/auth/login',requestOptions)
           .then((response)=>{
             if(response.status == "200"){
-              response.text().then(text => {
-                console.log(JSON.parse(text)['jwt_token']);  // important
-                session_login(JSON.parse(text)['jwt_token']);
+              response.text().then(async(text) => {
+                await session_login(JSON.parse(text)['jwt_token']).then(()=>{
+                  
+                  
+                });
+                
               })
-              alert("user login success");
-              navigate('/user');
             }
             else{
               alert("user login failed");
