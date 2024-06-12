@@ -53,8 +53,8 @@ function UserForm() {
         "graduateAtSchool": "",
         "graduateAtDepart": "",
         "graduateScore": "",
-        "rankOfYear": 0,
-        "numberOfYear": 0
+        "rankOfYear": "",
+        "numberOfYear": ""
     });
     
     // master profile 
@@ -65,8 +65,8 @@ function UserForm() {
         "graduateAtSchool": "",
         "graduateAtDepart": "",
         "graduateScore": "",
-        "rankOfYear": 0,
-        "numberOfYear": 0
+        "rankOfYear": "",
+        "numberOfYear": ""
     });
 
     // phd profile
@@ -165,7 +165,7 @@ function UserForm() {
                     //console.log(JSON.parse(text)['name']);  // important
                     // set the data
                     console.log( JSON.parse(text)['id'] );
-                    console.log( JSON.parse(text)['applicationForm']['basicProfile'] );
+                    console.log( JSON.parse(text)['affidavit'] );
 
                     setApplicationId( JSON.parse(text)['id'] );
                     setStatus( JSON.parse(text)['isSent'] );
@@ -229,7 +229,7 @@ function UserForm() {
 
 
                 })
-                alert("fetch stored application data success");
+                // alert("fetch stored application data success");
                 return 'success'
             }
             else if(response.status == "500"){
@@ -442,12 +442,15 @@ function UserForm() {
             body: formData
         }
         await fetch(url+'/file?studentNumber='+studentNumber+'&type=1',requestOptions)
-        .then((response)=>{
+        .then(async(response)=>{
+            let return_filename = '';
             if(response.status == "200"){
-                response.text().then(text => {
-                    return JSON.parse(text)['filename'];
+                await response.text().then((text) => {
+                    // alert(JSON.parse(text)['filename']);
+                    return_filename = JSON.parse(text)['filename'];
                 })
             }
+            return return_filename
         })
         .then((result)=> {return result;})
         .catch((error)=>{
@@ -461,7 +464,8 @@ function UserForm() {
         upload_file(forms['studyResearchPlan']['file']).then((response) => { 
             setForms( prev => ({ ...prev, ['studyResearchPlan'] : {'file':forms['studyResearchPlan']['file'] ,'path': response }}) )
         }); // revise
-        upload_file(forms['affidavit']['file']).then((response) => {
+        upload_file(forms['affidavit']['file']).then(async(response) => {
+            console.log(response);
             setForms( prev => ({ ...prev, ['affidavit']:{'file':forms['affidavit']['file'] ,'path': response }}) )
         }); // revise
         upload_file(forms['professorConsentForm']['file']).then((response) => {
@@ -1085,13 +1089,13 @@ function UserForm() {
         saveMasterProfile();
         savePhdProfile();
         saveForms();
-        saveTranscript();
-        saveRankCertificate();
-        conferencePapers.map( (x,index) => { saveConferencePaper(index); } );
-        researchProjects.map( (x,index) => { saveResearchProject(index); } );
-        courseProjects.map( (x,index) => { saveCourseProject(index); } );
-        languageCertificate.map( (x,index) => { saveLanguageCertificate(index); } );
-        additionalDocument.map( (x,index) => { saveAdditionalDocument(index); } );
+        // saveTranscript();
+        // saveRankCertificate();
+        // conferencePapers.map( (x,index) => { saveConferencePaper(index); } );
+        // researchProjects.map( (x,index) => { saveResearchProject(index); } );
+        // courseProjects.map( (x,index) => { saveCourseProject(index); } );
+        // languageCertificate.map( (x,index) => { saveLanguageCertificate(index); } );
+        // additionalDocument.map( (x,index) => { saveAdditionalDocument(index); } );
     }
     useEffect(()=>{
         getStoredData();
@@ -1157,7 +1161,7 @@ function UserForm() {
                         // getBase64(e.target.files[0]);
                         setConferencePaperFiles(newData);
                     }}
-                    value={ props.paper['attachment'] }
+                    // value={ props.paper['attachment'] }
                     type="file" class=" outline-none p-1.5 text-base border-b-2 w-full" ></input>
                 </div>
             </details>
@@ -1648,6 +1652,7 @@ function UserForm() {
                                 <h3>切結書上傳</h3>
                                 <input onChange={(e) => {
                                     const newData = {...forms};
+                                    alert(e.target.files[0])
                                     newData.affidavit = { ...newData.affidavit,['path']:getBase64(e.target.files[0]), ['file']: e.target.files[0]};
                                     setForms(newData);
                                 }} 
@@ -1670,7 +1675,7 @@ function UserForm() {
                                     // getBase64(e.target.files[0]);
                                     setForms(newData);
                                 }} 
-                                value={ forms['professorConsentForm']['path'] }
+                                // value={ forms['professorConsentForm']['path'] }
                                 type="file" class=" outline-none p-1.5 text-base border-b-2 w-full"></input>
                             </div>
                             
@@ -1689,7 +1694,7 @@ function UserForm() {
                                     // getBase64(e.target.files[0]);
                                     setForms(newData);
                                 }} 
-                                value={ forms['studyResearchPlan']['path'] }
+                                // value={ forms['studyResearchPlan']['path'] }
                                 type="file" class=" outline-none p-1.5 text-base border-b-2 w-full"></input>
                             </div>
                             
@@ -1708,7 +1713,7 @@ function UserForm() {
                                     // getBase64(e.target.files[0]);
                                     setTranscript(newData);
                                 }} 
-                                value={ transcript['bachelorTranscript']['path'] }
+                                // value={ transcript['bachelorTranscript']['path'] }
                                 type="file" class=" outline-none p-1.5 text-base border-b-2 w-full" ></input>
                             </div>
                             <div class="p-1.5">
@@ -1719,7 +1724,7 @@ function UserForm() {
                                     // getBase64(e.target.files[0]);
                                     setTranscript(newData);
                                 }}
-                                value={ transcript['masterTranscript']['path'] }
+                                // value={ transcript['masterTranscript']['path'] }
                                 type="file" class=" outline-none p-1.5 text-base border-b-2 w-full" ></input>
                             </div>
                             <div class="p-1.5">
@@ -1730,7 +1735,7 @@ function UserForm() {
                                     // getBase64(e.target.files[0]);
                                     setTranscript(newData);
                                 }}
-                                value={ transcript['phdTranscript']['path'] }
+                                // value={ transcript['phdTranscript']['path'] }
                                 type="file" class=" outline-none p-1.5 text-base border-b-2 w-full" ></input>
                             </div>
                         </div>
@@ -1748,7 +1753,7 @@ function UserForm() {
                                     // getBase64(e.target.files[0]);
                                     setCertificate(newData);
                                 }}
-                                value={ certificate['bachelorRanking']['path'] }
+                                // value={ certificate['bachelorRanking']['path'] }
                                 type="file" class=" outline-none p-1.5 text-base border-b-2 w-full" ></input>
                             </div>
                             <div class="p-1.5">
