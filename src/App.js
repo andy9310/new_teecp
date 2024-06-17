@@ -33,7 +33,7 @@ function App() {
           <Route path="/admin-score" element={<AdminScore />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/dnd" element={<DnD />} />
-          <Route path="/check-form" element={<CheckForm />} />
+          <Route path="/check-form/:id" element={<CheckForm />} />
           <Route path="/check" element={<Check />} />
           <Route path="/user-form" element={<UserForm />} />
           <Route path="/user" element={<User />} />

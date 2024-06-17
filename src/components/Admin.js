@@ -17,7 +17,7 @@ function Admin() {
                 <img class="relative inline h-28 mr-4" src={C} />
                 <div class="mt-4 inline-block text-left align-middle font-bold">
                     <p class="text-4xl">管理端</p>
-                    <p class="text-xl">Review</p>
+                    <p class="text-xl">Administration</p>
                 </div>
                 <Status></Status>
             </div>

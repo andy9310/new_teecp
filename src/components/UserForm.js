@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import './UserForm.css';
 import studentboard from "../images/3D.png";
 import add_sign from "../images/add_sign.svg";
+import delete_sign from "../images/trash.svg";
 import correct from "../images/correct.svg";
 import C from "../images/C.png";
 import { Link } from 'react-router-dom';
@@ -10,30 +11,25 @@ import StudentFooter from '../side_components/studentside_footer';
 import Status from './status';
 import { useSession } from '../context/session';
 import { GlobalContext } from '../context/global';
+import { redirect, useNavigate } from 'react-router-dom';
+import { getSession } from '../context/utils';
 
 function UserForm() {
     // gobal
     const { url } = useContext(GlobalContext);
-    const { user_session, userId, studentNumber } = useSession();
-    
-    // timestamp
-    const year = new Date().getFullYear();
-    const month = ('0' + (new Date().getMonth() + 1)).slice(-2);
-    const day = ('0' + new Date().getDate()).slice(-2);
-    const hour = ('0' + new Date().getHours()).slice(-2);
-    const day_string = "上午";
-    const minute = ('0' + new Date().getMinutes()).slice(-2);
-    const second = ('0' + new Date().getSeconds()).slice(-2);
-    const timestamp = `${year}/${month}/${day} ${hour}:${minute}:${second}`;
-
+    const { user_session, userId, studentNumber,session_login,setUserSession } = useSession();
+    const navigate = useNavigate();
+    if(user_session===undefined || userId===undefined){
+        navigate('./login');
+    }
     // application id
     const [applicationId, setApplicationId] = useState(0);
     
     // submit status
+    const [reset, setReset] = useState(false);
     const [status, setStatus] = useState(false);
     const [sendTime, setSendTime] = useState('');
     const [scores, setScores] = useState([]);
-
 
     // 
     // basic profile
@@ -140,8 +136,9 @@ function UserForm() {
     // additional document
     const [additionalDocument , setAdditionalDocument] = useState([]);
     const [additionalDocument_file , setAdditionalDocumentFiles] = useState([]);
+    
     // 
-    const [time, setTime] = useState(timestamp);
+    const [time, setTime] = useState("");
     const [button_disable, setButton] = useState(false);
     const [print_disable, setPrint] = useState(true);
     const [submit_disable, setSubmit] = useState(false);
@@ -160,18 +157,18 @@ function UserForm() {
         let id_string = userId.toString();
         await fetch(url+'/application/'+id_string,requestOptions)
         .then((response)=>{
-            if(response.status == "200"){
+
+            if(response.status == "200" ){
                 response.text().then(text => {
                     //console.log(JSON.parse(text)['name']);  // important
                     // set the data
-                    console.log( JSON.parse(text)['id'] );
-                    console.log( JSON.parse(text)['affidavit'] );
-
+                    console.log(JSON.parse(text));
                     setApplicationId( JSON.parse(text)['id'] );
                     setStatus( JSON.parse(text)['isSent'] );
                     setSendTime( JSON.parse(text)['sendAt'] );
                     setScores( JSON.parse(text)['scores'] ); // revise
                     setForms({
+                        "isSent": JSON.parse(text)["isSent"],
                         "studyResearchPlan": {
                             "file": forms["studyResearchPlan"]["file"],
                             "path": JSON.parse(text)["studyResearchPlan"]["path"]
@@ -185,7 +182,6 @@ function UserForm() {
                             "path": JSON.parse(text)["professorConsentForm"]["path"]
                         }    
                     });
-
                     setBasicProfile( JSON.parse(text)['applicationForm']['basicProfile'] ) ;
                     setBachelorProfile( JSON.parse(text)['applicationForm']['bachelorProfile'] ) ;
                     setMasterProfile( JSON.parse(text)['applicationForm']['masterProfile'] ) ;
@@ -221,6 +217,7 @@ function UserForm() {
                         } 
                     });
                     setConferencePaper( JSON.parse(text)['conferencePapers'] );
+                    // console.log(JSON.parse(text)['conferencePapers'][0]['conferenceName']);
                     setResearchProjects( JSON.parse(text)['researchProjects'] );
                     setCourseProjects( JSON.parse(text)['courseProjects'] );
                     setAdditionalDocument( JSON.parse(text)['additionalDocuments'] );
@@ -229,7 +226,7 @@ function UserForm() {
 
 
                 })
-                // alert("fetch stored application data success");
+                alert("fetch stored application data success");
                 return 'success'
             }
             else if(response.status == "500"){
@@ -258,13 +255,14 @@ function UserForm() {
         const requestOptions = {
             method: "POST",
             headers: postHeader,
-            // redirect: "follow", 
+            redirect: "follow", 
         }
         await fetch(url+'/application/',requestOptions)
         .then((response)=>{
             if(response.status == "200"){
                 response.text().then(text => {
                     alert("Build application data success");
+                    setReset(!reset);
                 })
             }
         })
@@ -423,9 +421,8 @@ function UserForm() {
         });
     }; 
 
-    const upload_file = async(file) => {
-        if(file === undefined){
-            alert('no file');
+    const upload_file = async(file,type) => {
+        if(file === undefined || file === null){
             return;
         }
         const formData = new FormData();
@@ -441,39 +438,25 @@ function UserForm() {
             redirect: "follow",
             body: formData
         }
-        await fetch(url+'/file?studentNumber='+studentNumber+'&type=1',requestOptions)
+        let result = await fetch(url+'/file?studentNumber='+studentNumber+'&type='+type.toString(),requestOptions)
         .then(async(response)=>{
             let return_filename = '';
             if(response.status == "200"){
                 await response.text().then((text) => {
-                    // alert(JSON.parse(text)['filename']);
                     return_filename = JSON.parse(text)['filename'];
                 })
             }
-            return return_filename
+            return return_filename;
         })
-        .then((result)=> {return result;})
         .catch((error)=>{
             alert("patch phd profile error");
             console.error(error);
         });
-
+        return result;
     }; 
-    const saveForms = async() => {
+    const saveForms = async(form) => {
 
-        upload_file(forms['studyResearchPlan']['file']).then((response) => { 
-            setForms( prev => ({ ...prev, ['studyResearchPlan'] : {'file':forms['studyResearchPlan']['file'] ,'path': response }}) )
-        }); // revise
-        upload_file(forms['affidavit']['file']).then(async(response) => {
-            console.log(response);
-            setForms( prev => ({ ...prev, ['affidavit']:{'file':forms['affidavit']['file'] ,'path': response }}) )
-        }); // revise
-        upload_file(forms['professorConsentForm']['file']).then((response) => {
-            setForms( prev => ({ ...prev, ['professorConsentForm']:{'file':forms['professorConsentForm']['file'] ,'path': response }}) )
-        }); // revise
-       
-
-        let request_body = forms
+        let request_body = form;
         let patchHeader = {
             "Content-Type": "application/json",
             "Accept": "application/json",
@@ -485,7 +468,8 @@ function UserForm() {
             redirect: "follow",
             body: JSON.stringify(request_body)
         }
-        await fetch(url+'/application/'+userId,requestOptions)
+        let id_string = userId.toString();
+        await fetch(url+'/application/'+id_string,requestOptions)
         .then((response)=>{
             if(response.status == "200"){
                 response.text().then(text => {
@@ -504,9 +488,7 @@ function UserForm() {
 
     const saveTranscript = async() => {
 
-        upload_file(transcript['bachelorTranscript']['file']).then((response) => {setForms( prev => ({ ...prev, ['bachelorTranscript']:{'file':transcript['bachelorTranscript']['file'] ,'path': response }}) )}); // revise
-        upload_file(transcript['masterTranscript']['file']).then((response) => {setForms( prev => ({ ...prev, ['masterTranscript']:{'file':transcript['masterTranscript']['file'] ,'path': response }}) )}); // revise
-        upload_file(transcript['phdTranscript']['file']).then((response) => {setForms( prev => ({ ...prev, ['phdTranscript']:{'file':transcript['phdTranscript']['file'] ,'path': response }}) )}); // revise
+        
 
         let request_body = transcript;
         let patchHeader = {
@@ -537,13 +519,9 @@ function UserForm() {
         });
     };
 
-    const saveRankCertificate = async() => {
+    const saveRankCertificate = async(certificate) => {
 
-        upload_file(certificate['bachelorRanking']['file']).then((response) => {setForms( prev => ({ ...prev, ['bachelorRanking']:{'file':certificate['bachelorRanking']['file'] ,'path': response }}) )}); // revise
-        upload_file(certificate['masterRanking']['file']).then((response) => {setForms( prev => ({ ...prev, ['masterRanking']:{'file':certificate['masterRanking']['file'] ,'path': response }}) )}); // revise
-        upload_file(certificate['phdRanking']['file']).then((response) => {setForms( prev => ({ ...prev, ['phdRanking']:{'file':certificate['phdRanking']['file'] ,'path': response }}) )}); // revise
-
-        let request_body = transcript;
+        let request_body = certificate;
         let patchHeader = {
             "Content-Type": "application/json",
             "Accept": "application/json",
@@ -605,21 +583,17 @@ function UserForm() {
     }; 
 
 
-    const saveConferencePaper = async(index) => {
+    const saveConferencePaper = async(tmp_conferencePapers, index) => {
         
-        upload_file( conferencePapers_file[index] ).then((response) => {
-            const newData = [...conferencePapers];
-            newData[index]['attachment'] = response;
-            setConferencePaper(newData);
-        }); // revise
         let request_body = {
-            "conferenceName": conferencePapers[index]['conferenceName'],
-            "paperName": conferencePapers[index]['paperName'],
-            "authors": conferencePapers[index]['authors'],
+            "conferenceName": tmp_conferencePapers[index]['conferenceName'],
+            "paperName": tmp_conferencePapers[index]['paperName'],
+            "authors": tmp_conferencePapers[index]['authors'],
             "attachment": {
-                "path": conferencePapers[index]['attachment']
+                "path": (tmp_conferencePapers[index]['attachment']===undefined?"":tmp_conferencePapers[index]['attachment'])
             }
         }
+        console.log(request_body);
         let patchHeader = {
             "Content-Type": "application/json",
             "Accept": "application/json",
@@ -631,7 +605,7 @@ function UserForm() {
             redirect: "follow",
             body: JSON.stringify(request_body)
         }
-        await fetch(url+'/application/'+applicationId.toString()+'/conference-paper/'+conferencePapers[index]['id'],requestOptions)
+        await fetch(url+'/application/'+applicationId.toString()+'/conference-paper/'+tmp_conferencePapers[index]['id'],requestOptions)
         .then((response)=>{
             if(response.status == "200"){
                 response.text().then(text => {
@@ -665,6 +639,7 @@ function UserForm() {
                 response.text().then(text => {
                     if( JSON.parse(text)['success'] ){
                         alert('delete conference paper success');
+                        getStoredData();
                     }
                 })
             }
@@ -707,21 +682,16 @@ function UserForm() {
         });
     }; 
 
-    const saveResearchProject = async(index) => {
+    const saveResearchProject = async(tmp_researchProjects, index) => {
         
-        upload_file( researchProjects_file[index] ).then((response) => {
-            const newData = [...researchProjects];
-            newData[index]["attachment"] = response;
-            setResearchProjects(newData);  
-        }); // revise
         let request_body = {
-            "projectName": researchProjects[index]['projectName'],
-            "projectNumber": researchProjects[index]['projectNumber'],
-            "advisor": researchProjects[index]['advisor'],
-            "researchName": researchProjects[index]['researchName'],
-            "author": researchProjects[index]['author'],
+            "projectName": tmp_researchProjects[index]['projectName'],
+            "projectNumber": tmp_researchProjects[index]['projectNumber'],
+            "advisor": tmp_researchProjects[index]['advisor'],
+            "researchName": tmp_researchProjects[index]['researchName'],
+            "author": tmp_researchProjects[index]['author'],
             "attachment": {
-              "path": researchProjects[index]['attachment']
+              "path": tmp_researchProjects[index]['attachment']
             }
         }
         
@@ -736,7 +706,7 @@ function UserForm() {
             redirect: "follow",
             body: JSON.stringify(request_body)
         }
-        await fetch(url+'/application/'+applicationId.toString()+'/research-project/'+ researchProjects[index]['id'],requestOptions)
+        await fetch(url+'/application/'+applicationId.toString()+'/research-project/'+ tmp_researchProjects[index]['id'],requestOptions)
         .then((response)=>{
             if(response.status == "200"){
                 response.text().then(text => {
@@ -812,20 +782,16 @@ function UserForm() {
         });
     }; 
 
-    const saveCourseProject = async(index) => {
+    const saveCourseProject = async(tmp_courseProjects, index) => {
         
-        upload_file( courseProjects_file[index] ).then((response) => {
-            const newData = [...courseProjects];
-            newData[index]['attachment'] = response;
-            setCourseProjects(newData);
-        }); // revise
+        
         let request_body = {
-            "courseName": courseProjects[index]['courseName'],
-            "courseTeacher": courseProjects[index]['courseTeacher'],
-            "projectName": courseProjects[index]['projectName'],
-            "authors": courseProjects[index]['authors'],
+            "courseName": tmp_courseProjects[index]['courseName'],
+            "courseTeacher": tmp_courseProjects[index]['courseTeacher'],
+            "projectName": tmp_courseProjects[index]['projectName'],
+            "authors": tmp_courseProjects[index]['authors'],
             "attachment": {
-                "path": courseProjects[index]['attachment']
+                "path": tmp_courseProjects[index]['attachment']
             }
         }
         let patchHeader = {
@@ -839,19 +805,19 @@ function UserForm() {
             redirect: "follow",
             body: JSON.stringify(request_body)
         }
-        await fetch(url+'/application/'+applicationId.toString()+'/conference-paper/'+ researchProjects[index]['id'],requestOptions)
+        await fetch(url+'/application/'+applicationId.toString()+'/course-project/'+ tmp_courseProjects[index]['id'],requestOptions)
         .then((response)=>{
             if(response.status == "200"){
                 response.text().then(text => {
                     if( JSON.parse(text)['success'] ){
-                        alert('patch conference paper success');
+                        alert('patch course-project success');
                     }
                 })
             }
         })
         .then((result)=>console.log(result))
         .catch((error)=>{
-            alert("patch conference paper error");
+            alert("patch course-project error");
             console.error(error);
         });
     };
@@ -915,17 +881,13 @@ function UserForm() {
         });
     }; 
 
-    const saveAdditionalDocument = async(index) => {
+    const saveAdditionalDocument = async(tmp_additionalDocument, index) => {
         
-        upload_file( additionalDocument_file[index] ).then((response) => {
-            const newData = [...additionalDocument];
-            newData[index]['attachment'] = response;
-            setAdditionalDocument(newData);
-        }); // revise
+       
         let request_body = {
-            "name": additionalDocument[index]['name'],
+            "name": tmp_additionalDocument[index]['name'],
             "attachment": {
-                "path": additionalDocument[index]['attachment']
+                "path": tmp_additionalDocument[index]['attachment']
             }
         }
         let patchHeader = {
@@ -939,7 +901,7 @@ function UserForm() {
             redirect: "follow",
             body: JSON.stringify(request_body)
         }
-        await fetch(url+'/application/'+applicationId.toString()+'/additional-document/'+ additionalDocument[index]['id'],requestOptions)
+        await fetch(url+'/application/'+applicationId.toString()+'/additional-document/'+ tmp_additionalDocument[index]['id'],requestOptions)
         .then((response)=>{
             if(response.status == "200"){
                 response.text().then(text => {
@@ -1015,17 +977,12 @@ function UserForm() {
         });
     }; 
 
-    const saveLanguageCertificate = async(index) => {
+    const saveLanguageCertificate = async(tmp_languageCertificate, index) => {
         
-        upload_file( languageCertificate_file[index] ).then((response) => {
-            const newData = [...languageCertificate];
-            newData[index]['attachment'] = response;
-            setLanguageCertificate(newData);
-        }); // revise
         let request_body = {
-            "name": languageCertificate[index]['name'],
+            "name": tmp_languageCertificate[index]['name'],
             "attachment": {
-                "path": languageCertificate[index]['attachment']
+                "path": tmp_languageCertificate[index]['attachment']
             }
         }
         let patchHeader = {
@@ -1039,7 +996,7 @@ function UserForm() {
             redirect: "follow",
             body: JSON.stringify(request_body)
         }
-        await fetch(url+'/application/'+applicationId.toString()+'/language-certificate/'+ languageCertificate[index]['id'],requestOptions)
+        await fetch(url+'/application/'+applicationId.toString()+'/language-certificate/'+ tmp_languageCertificate[index]['id'],requestOptions)
         .then((response)=>{
             if(response.status == "200"){
                 response.text().then(text => {
@@ -1083,12 +1040,124 @@ function UserForm() {
             console.error(error);
         });
     };
-    const saveAll = () => {
+    async function saveAll(){
+        // save timestamp
+        const year = new Date().getFullYear();
+        const month = ('0' + (new Date().getMonth() + 1)).slice(-2);
+        const day = ('0' + new Date().getDate()).slice(-2);
+        const hour = ('0' + new Date().getHours()).slice(-2);
+        const day_string = "上午";
+        const minute = ('0' + new Date().getMinutes()).slice(-2);
+        const second = ('0' + new Date().getSeconds()).slice(-2);
+        const timestamp = `${year}/${month}/${day} ${hour}:${minute}:${second}`;
+        setTime(timestamp);
+        
+        // 
         saveBasicProfile();
         saveBachelorProfile();
         saveMasterProfile();
         savePhdProfile();
-        saveForms();
+        // save form 
+        
+        let tmp_form = {...forms};
+        tmp_form["studyResearchPlan"]["path"] = await upload_file(forms['studyResearchPlan']['file'],1);
+        tmp_form["affidavit"]["path"] = await upload_file(forms['affidavit']['file'],1);
+        tmp_form["professorConsentForm"]["path"] = await upload_file(forms['professorConsentForm']['file'],1);
+        setForms( prev => ({ ...prev, 
+            ['studyResearchPlan'] : {'file':forms['studyResearchPlan']['file'] ,'path': tmp_form["studyResearchPlan"]["path"] },
+            ['affidavit']:{'file':forms['affidavit']['file'] ,'path': tmp_form["affidavit"]["path"] },
+            ['professorConsentForm']:{'file':forms['professorConsentForm']['file'] ,'path': tmp_form["professorConsentForm"]["path"]}
+        }) )
+        console.log(tmp_form);
+        saveForms(tmp_form);
+
+        // save transcript 
+
+        let tmp_transcript = {...transcript};
+        tmp_transcript['bachelorTranscript']['path'] = await upload_file(transcript['bachelorTranscript']['file'],1); 
+        tmp_transcript['masterTranscript']['path'] = await upload_file(transcript['masterTranscript']['file'],1); 
+        tmp_transcript['phdTranscript']['path'] = await upload_file(transcript['phdTranscript']['file'],1); 
+        setTranscript( prev => ({ ...prev, 
+            ['bachelorTranscript'] : {'file': transcript['bachelorTranscript']['file'] ,'path': tmp_transcript['bachelorTranscript']['path'] },
+            ['masterTranscript']:{'file': transcript['masterTranscript']['file'] ,'path': tmp_transcript['masterTranscript']['path'] },
+            ['phdTranscript']:{'file': transcript['phdTranscript']['file'] ,'path': tmp_transcript['phdTranscript']['path'] }
+        }) )
+        saveTranscript(tmp_transcript);
+
+        // save rank certificate
+        // upload_file(certificate['bachelorRanking']['file']).then((response) => {setForms( prev => ({ ...prev, ['bachelorRanking']:{'file':certificate['bachelorRanking']['file'] ,'path': response }}) )}); // revise
+        // upload_file(certificate['masterRanking']['file']).then((response) => {setForms( prev => ({ ...prev, ['masterRanking']:{'file':certificate['masterRanking']['file'] ,'path': response }}) )}); // revise
+        // upload_file(certificate['phdRanking']['file']).then((response) => {setForms( prev => ({ ...prev, ['phdRanking']:{'file':certificate['phdRanking']['file'] ,'path': response }}) )}); // revise
+        
+        let tmp_certificate = {...certificate};
+        tmp_certificate['bachelorRanking']['path'] = await upload_file(certificate['bachelorRanking']['file'],1); 
+        tmp_certificate['masterRanking']['path'] = await upload_file(certificate['masterRanking']['file'],1); 
+        tmp_certificate['phdRanking']['path'] = await upload_file(certificate['phdRanking']['file'],1); 
+        setCertificate( prev => ({ ...prev, 
+            ['bachelorRanking'] : {'file': certificate['bachelorRanking']['file'] ,'path': tmp_certificate['bachelorRanking']['path'] },
+            ['masterRanking']:{'file': certificate['masterRanking']['file'] ,'path': tmp_certificate['masterRanking']['path'] },
+            ['phdRanking']:{'file': certificate['phdRanking']['file'] ,'path': tmp_certificate['phdRanking']['path'] }
+        }) )
+        saveRankCertificate(tmp_transcript);
+
+        // save conference paper
+        
+        let tmp_conferencePaper = [...conferencePapers];
+        conferencePapers.map( async (x,index) => { 
+            tmp_conferencePaper[index]['attachment'] = await upload_file( conferencePapers_file[index],1);
+            saveConferencePaper(tmp_conferencePaper,index); 
+        });
+        setConferencePaper( tmp_conferencePaper );
+
+        // save research project
+
+        let tmp_researchProjects = [...researchProjects];
+        researchProjects.map( async (x,index) => { 
+            tmp_researchProjects[index]['attachment'] = await upload_file( researchProjects_file[index],1);
+            saveResearchProject(tmp_researchProjects,index); 
+        });
+        setResearchProjects( tmp_researchProjects );
+
+        // save courseProjects
+        
+        let tmp_courseProjects = [...courseProjects];
+        courseProjects.map( async (x,index) => { 
+            tmp_courseProjects[index]['attachment'] = await upload_file( courseProjects_file[index],1);
+            saveCourseProject(tmp_courseProjects,index); 
+        });
+        setCourseProjects( tmp_courseProjects );
+
+        // save language certificate
+
+        let tmp_languageCertificate = [...languageCertificate];
+        languageCertificate.map( async (x,index) => { 
+            tmp_languageCertificate[index]['attachment'] = await upload_file( languageCertificate_file[index],1);
+            saveLanguageCertificate(tmp_languageCertificate,index); 
+        });
+        setLanguageCertificate( tmp_languageCertificate );
+
+        // save additional document
+        
+        let tmp_additionalDocument = [...additionalDocument];
+        additionalDocument.map( async (x,index) => { 
+            tmp_additionalDocument[index]['attachment'] = await upload_file( additionalDocument_file[index],1);
+            saveAdditionalDocument(tmp_additionalDocument,index); 
+        });
+        setAdditionalDocument( tmp_additionalDocument );
+
+        // upload_file(forms['studyResearchPlan']['file']).then((response) => { 
+        //     tmp_form["studyResearchPlan"]["path"] = response;
+        //     setForms( prev => ({ ...prev, ['studyResearchPlan'] : {'file':forms['studyResearchPlan']['file'] ,'path': response }}) )
+        // }); 
+        // upload_file(forms['affidavit']['file']).then((response) => {
+        //     tmp_form["affidavit"]["path"] = response;
+        //     setForms( prev => ({ ...prev, ['affidavit']:{'file':forms['affidavit']['file'] ,'path': response }}) )
+        // }); 
+        // upload_file(forms['professorConsentForm']['file']).then((response) => {
+        //     tmp_form["professorConsentForm"]["path"] = response;
+        //     setForms( prev => ({ ...prev, ['professorConsentForm']:{'file':forms['professorConsentForm']['file'] ,'path': response }}) )
+        // }); 
+    
         // saveTranscript();
         // saveRankCertificate();
         // conferencePapers.map( (x,index) => { saveConferencePaper(index); } );
@@ -1096,11 +1165,22 @@ function UserForm() {
         // courseProjects.map( (x,index) => { saveCourseProject(index); } );
         // languageCertificate.map( (x,index) => { saveLanguageCertificate(index); } );
         // additionalDocument.map( (x,index) => { saveAdditionalDocument(index); } );
-    }
-    useEffect(()=>{
-        getStoredData();
-    },[]);
 
+    }
+
+    useEffect(()=>{
+        const sessionUser = getSession('user');
+        if (sessionUser) {
+            session_login(sessionUser);
+        }
+        
+    },[]);
+    useEffect(()=>{
+        if(userId){
+            alert("userId"+userId);
+            getStoredData();
+        }
+    },[userId,reset])
 
     function getBase64(file) { // for upload file 
         var reader = new FileReader();
@@ -1116,45 +1196,58 @@ function UserForm() {
         if(window.confirm("一經送出即無法修改，您確定要送出了?")){
             setPrint(false);
             setSubmit(true);
+            const newData = {...forms};
+            newData.isSent = true;
+            setForms(newData);
+            saveForms(newData);
         }
         else{
             setPrint(true);
         }
     };
-
-    function Seminar(props){
+    const Seminar = React.memo((props) => {
         return(
-            <details class="rounded-md border border-black my-1 mx-1 p-1">
-                <summary>研討會論文{props.number+1}</summary>
-                <h2>研討會名稱</h2>
-                <input onChange={(e) => {
-                    const newData = [...conferencePapers];
-                    newData[props.number]['conferenceName'] = e.target.value;
-                    // getBase64(e.target.files[0]);
-                    setConferencePaper(newData);
-                }}
-                value={props.paper['conferenceName']}
-                type='text' class=" outline-none p-1.25 text-base border-b-2 w-full"   ></input>
-                <h2>論文名稱</h2>
-                <input onChange={(e) => {
-                    const newData = [...conferencePapers];
-                    newData[props.number]['paperName'] = e.target.value;
-                    // getBase64(e.target.files[0]);
-                    setConferencePaper(newData);
-                }}
-                value={props.paper['paperName']}
-                type='text' class=" outline-none p-1.25 text-base border-b-2 w-full"   ></input>
-                <h2>作者群</h2>
-                <input onChange={(e) => {
-                    const newData = [...conferencePapers];
-                    newData[props.number]['authors'] = e.target.value;
-                    // getBase64(e.target.files[0]);
-                    setConferencePaper(newData);
-                }}
-                value={props.paper['authors']}
-                type='text' class=" outline-none p-1.25 text-base border-b-2 w-full"   ></input>
+            <div class="rounded-md border border-black my-1 mx-1 p-1" >
+                <div class="flex flex-column justify-between p-1">
+                    <h1 class="font-bold">研討會論文{props.number+1}</h1>
+                    <button type="button" class="h-5 w-5 m-2" onClick={()=>{deleteConferencePaper(props.number);}}><ion-icon size="large" src={delete_sign}></ion-icon></button>
+                </div>
+                <h2 class="p-1" >研討會名稱</h2>
+                <div class="p-1">
+                    <input onChange={(e) => {
+                        const newData = [...conferencePapers];
+                        newData[props.number]['conferenceName'] = e.target.value;
+                        // getBase64(e.target.files[0]);
+                        setConferencePaper(newData);
+                    }}
+                    value={props.paper['conferenceName']}
+                    type='text' class=" outline-none p-1.25 text-base border-b-2 w-full"   >
+                    </input>
+                </div>
+                <h2 class="p-1">論文名稱</h2>
+                <div class="p-1">
+                    <input onChange={(e) => {
+                        const newData = [...conferencePapers];
+                        newData[props.number]['paperName'] = e.target.value;
+                        // getBase64(e.target.files[0]);
+                        setConferencePaper(newData);
+                    }}
+                    value={props.paper['paperName']}
+                    type='text' class=" outline-none p-1.25 text-base border-b-2 w-full"   ></input>
+                </div>
+                <h2 class="p-1">作者群</h2>
+                <div class="p-1">
+                    <input onChange={(e) => {
+                        const newData = [...conferencePapers];
+                        newData[props.number]['authors'] = e.target.value;
+                        // getBase64(e.target.files[0]);
+                        setConferencePaper(newData);
+                    }}
+                    value={props.paper['authors']}
+                    type='text' class=" outline-none p-1.25 text-base border-b-2 w-full"   ></input>
+                </div>
                 <div >
-                    <h3>論文上傳</h3>
+                    <h3 class="p-1" >論文上傳</h3>
                     <input onChange={(e) => {
                         const newData = [...conferencePapers_file];
                         newData[props.number] = e.target.files[0];
@@ -1164,9 +1257,9 @@ function UserForm() {
                     // value={ props.paper['attachment'] }
                     type="file" class=" outline-none p-1.5 text-base border-b-2 w-full" ></input>
                 </div>
-            </details>
+            </div>
         );
-    }
+    });
     function TeachPlan(props){
         return(
             <details class="rounded-md border border-black my-1 mx-1 p-1">
@@ -1652,13 +1745,14 @@ function UserForm() {
                                 <h3>切結書上傳</h3>
                                 <input onChange={(e) => {
                                     const newData = {...forms};
-                                    alert(e.target.files[0])
-                                    newData.affidavit = { ...newData.affidavit,['path']:getBase64(e.target.files[0]), ['file']: e.target.files[0]};
+                                    newData.affidavit = { ...newData.affidavit , ['file']: e.target.files[0]};
                                     setForms(newData);
                                 }} 
-                                value={ forms['affidavit']['path'] }
                                 type="file" class=" outline-none p-1.5 text-base border-b-2 w-full" ></input>
+                            <h1>已儲存 : {forms["affidavit"]["path"]}</h1>
+                            <h1>儲存時間 : {time}</h1>
                             </div>
+                            
                             
                         </div>
                     </div>
@@ -1677,6 +1771,8 @@ function UserForm() {
                                 }} 
                                 // value={ forms['professorConsentForm']['path'] }
                                 type="file" class=" outline-none p-1.5 text-base border-b-2 w-full"></input>
+                            <h1>已儲存 : {forms["professorConsentForm"]["path"]}</h1>
+                            <h1>儲存時間 : {time}</h1>
                             </div>
                             
                         </div>
@@ -1696,6 +1792,8 @@ function UserForm() {
                                 }} 
                                 // value={ forms['studyResearchPlan']['path'] }
                                 type="file" class=" outline-none p-1.5 text-base border-b-2 w-full"></input>
+                            <h1>已儲存 : {forms["studyResearchPlan"]["path"]}</h1>
+                            <h1>儲存時間 : {time}</h1>
                             </div>
                             
                         </div>
@@ -1715,6 +1813,8 @@ function UserForm() {
                                 }} 
                                 // value={ transcript['bachelorTranscript']['path'] }
                                 type="file" class=" outline-none p-1.5 text-base border-b-2 w-full" ></input>
+                                <h1>已儲存 : {transcript["bachelorTranscript"]["path"]}</h1>
+                                <h1>儲存時間 : {time}</h1>
                             </div>
                             <div class="p-1.5">
                                 <h3>碩士歷年成績單上傳</h3>
@@ -1726,6 +1826,8 @@ function UserForm() {
                                 }}
                                 // value={ transcript['masterTranscript']['path'] }
                                 type="file" class=" outline-none p-1.5 text-base border-b-2 w-full" ></input>
+                                <h1>已儲存 : {transcript["masterTranscript"]["path"]}</h1>
+                                <h1>儲存時間 : {time}</h1>
                             </div>
                             <div class="p-1.5">
                                 <h3>博士歷年成績單上傳</h3>
@@ -1737,6 +1839,8 @@ function UserForm() {
                                 }}
                                 // value={ transcript['phdTranscript']['path'] }
                                 type="file" class=" outline-none p-1.5 text-base border-b-2 w-full" ></input>
+                                <h1>已儲存 : {transcript["phdTranscript"]["path"]}</h1>
+                                <h1>儲存時間 : {time}</h1>
                             </div>
                         </div>
                     </div>
@@ -1755,6 +1859,8 @@ function UserForm() {
                                 }}
                                 // value={ certificate['bachelorRanking']['path'] }
                                 type="file" class=" outline-none p-1.5 text-base border-b-2 w-full" ></input>
+                                <h1>已儲存 : {certificate["bachelorRanking"]["path"]}</h1>
+                                <h1>儲存時間 : {time}</h1>
                             </div>
                             <div class="p-1.5">
                                 <h3>碩士名次證明書上傳</h3>
@@ -1765,6 +1871,8 @@ function UserForm() {
                                     setCertificate(newData);
                                 }}
                                 type="file" class=" outline-none p-1.5 text-base border-b-2 w-full" ></input>
+                                <h1>已儲存 : {certificate["masterRanking"]["path"]}</h1>
+                                <h1>儲存時間 : {time}</h1>
                             </div>
                             <div class="p-1.5">
                                 <h3>博士名次證明書上傳</h3>
@@ -1775,6 +1883,8 @@ function UserForm() {
                                     setCertificate(newData);
                                 }}
                                 type="file" class=" outline-none p-1.5 text-base border-b-2 w-full" ></input>
+                                <h1>已儲存 : {certificate["phdRanking"]["path"]}</h1>
+                                <h1>儲存時間 : {time}</h1>
                             </div>
                             
                         </div>

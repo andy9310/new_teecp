@@ -9,7 +9,6 @@ export const SessionProvider = ({ children }) => {
     const [user_session, setUserSession] = useState(null);
     const [userType, setUserType] = useState(null); // 'manager', 'student', 'reviewer'
     const [userName, setUserName] = useState('使用者');
-    // const [id, setId] = useState(null);
     const [userId, setUserId] = useState(null);
     const [studentNumber, setStudentNumber] = useState(null);
     const [reviewerInfo, setReviewerInfo] = useState({});
@@ -38,12 +37,14 @@ export const SessionProvider = ({ children }) => {
         .then(async(response)=>{
             if(response.status == "200"){
                 await response.text().then( (text) => {
+                    console.log(JSON.parse(text));
                     setUserName(JSON.parse(text)['name']);
                     // setId(JSON.parse(text)['id']);
                     if(JSON.parse(text)['manager']){
                         setUserType('manager');
                     }
-                    else if(JSON.parse(text)['student']['studentNumber'] !== ''){
+                    else if(('student'in JSON.parse(text)) && ('studentNumber'in JSON.parse(text)['student']) && JSON.parse(text)['student']['studentNumber'] !== ''){
+                        
                         setUserType('student');
                         setStudentNumber(JSON.parse(text)['student']['studentNumber']);
                         setUserId(JSON.parse(text)['id']);
@@ -73,7 +74,7 @@ export const SessionProvider = ({ children }) => {
         clearSession('user');
     };
     return (
-        <SessionContext.Provider value={{ user_session, session_login, session_logout, userName, setUserName, userId, studentNumber, userType }}>
+        <SessionContext.Provider value={{ setUserSession,user_session, session_login, session_logout, userName, setUserName, userId, studentNumber, userType }}>
         {children}
         </SessionContext.Provider>
     );

@@ -1,5 +1,5 @@
 import {Reorder, useMotionValue} from 'framer-motion'
-import { useState } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Table } from "reactstrap";
 import { useRaisedShadow } from "../side_components/use-raised-shadow";
 import {Card, CardBody,Button} from "@nextui-org/react"; // use Nextui as 
@@ -13,24 +13,175 @@ import {
     IonReorderGroup,
   } from '@ionic/react';
 import DragSign from "../images/reorder-four.svg";
+import { useSession } from '../context/session';
+import { GlobalContext } from '../context/global';
+import { redirect, useNavigate, Link } from 'react-router-dom';
 
 function DnD(){
-    const [A_items, setAItems] = useState([1,2,3,4,5]);
+    const navigate = useNavigate();
+    const { url } = useContext(GlobalContext);
+    const { user_session, userId, studentNumber } = useSession();
+    // user meta data
+    const [studentA_array, setStudentA_Array] = useState([]);
+    const [studentB_array, setStudentB_Array] = useState([]);
+    // A B 
+    const [A_items, setAItems] = useState([{
+        "user-id":12,
+        "app-id":2,
+        "team":'CSP',
+        "advisor":'楊鈞安',
+    }]);
+    const [B_items, setBItems] = useState([]);
+    const [A_isDisabled, setAIsDisabled] = useState(true);
+    const [B_isDisabled, setBIsDisabled] = useState(true);
 
-    const [B_items, setBItems] = useState(["test","test","test"]);
+    /// get all user
+    const get_all_user = async() => {
+        let getHeader = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            // "Authorization": `Bearer ${user_session}`,
+        }
+        const requestOptions = {
+            method: "GET",
+            headers: getHeader,
+            redirect: "follow",
+        }
+        await fetch(url+'/user/',requestOptions)
+        .then((response)=>{
+            if(response.status == "200"){
+                response.text().then(text => {
+
+                    console.log(JSON.parse(text));  
+                    const student_array = JSON.parse(text).filter(user =>('student' in user) && user['student']['studentNumber']!=="");
+                    student_array .map((student)=>{ getAllData(student['id']) })
+                    //setStudentA_Array(JSON.parse(text).filter(application =>  application["applicationForm"]["basicProfile"]["applicationType"] === "A"));
+                    //setStudentB_Array(JSON.parse(text).filter(application =>  application["applicationForm"]["basicProfile"]["applicationType"] === "B"));
+                    alert("get user metadata success");
+                })
+            }
+            else{
+                alert("get user metadata failed");
+            }
+        })
+        .then((result)=>console.log(result))
+        .catch((error)=>{
+            alert("get user metadata error");
+            console.error(error);
+        });
+    }
     
-    const [isDisabled, setIsDisabled] = useState(true);
+    /// get all application metadata 
+    // const get_all_application = async() =>{
+    //     let getHeader = {
+    //         "Content-Type": "application/json",
+    //         "Accept": "application/json",
+    //         "Authorization": `Bearer ${user_session}`,
+    //     }
+    //     const requestOptions = {
+    //         method: "GET",
+    //         headers: getHeader,
+    //         redirect: "follow",
+    //     }
+    //     await fetch(url+'/application/',requestOptions)
+    //     .then((response)=>{
+    //         if(response.status == "200"){
+    //             response.text().then(text => {
+
+    //                 console.log(JSON.parse(text));  
+    //                 // JSON.parse(text).map((student)=>{ getAllData(student['id']) })
+    //                 //setStudentA_Array(JSON.parse(text).filter(application =>  application["applicationForm"]["basicProfile"]["applicationType"] === "A"));
+    //                 //setStudentB_Array(JSON.parse(text).filter(application =>  application["applicationForm"]["basicProfile"]["applicationType"] === "B"));
+    //                 alert("get user metadata success");
+    //             })
+    //         }
+    //         else{
+    //             alert("get user metadata failed");
+    //         }
+    //     })
+    //     .then((result)=>console.log(result))
+    //     .catch((error)=>{
+    //         alert("get user metadata error");
+    //         console.error(error);
+    //     });
+    // }
+
+    /// get all application data
+    const getAllData = async(id) => {
+        let getHeader = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": `Bearer ${user_session}`,
+        }
+        const requestOptions = {
+            method: "GET",
+            headers: getHeader,
+            redirect: "follow",
+        }
+        let id_string = id.toString();
+        await fetch(url+'/application/'+id_string,requestOptions)
+        .then((response)=>{
+
+            if(response.status == "200" ){
+                response.text().then(text => {
+                    //console.log(JSON.parse(text)['name']);  // important
+                    // set the data
+                    console.log(JSON.parse(text));
+                    if(JSON.parse(text)['applicationForm']['basicProfile']['applicationType'] === "A"){
+                        
+                        let item = {
+                            "user-id":id,
+                            "app-id":JSON.parse(text)['id'],
+                            "team":JSON.parse(text)['applicationForm']['basicProfile']['team'],
+                            "advisor":JSON.parse(text)['applicationForm']['basicProfile']['advisor'],
+                        }
+                        console.log([...A_items, item]);
+                        setAItems([...A_items, item])
+                    }
+                    else if(JSON.parse(text)['applicationForm']['basicProfile']['applicationType'] === "B"){
+                        let item = {
+                            "user-id":id,
+                            "id":JSON.parse(text)['id'],
+                            "team":JSON.parse(text)['applicationForm']['basicProfile']['team'],
+                            "advisor":JSON.parse(text)['applicationForm']['basicProfile']['advisor'],
+                        }
+                        setBItems([...B_items, item])
+                    }else{
+                        console.log("no type found");
+                    }
+                    
+                })
+                // alert("fetch stored application data success");
+                return 'success'
+            }
+            else{
+                alert("fetch stored application data failed");
+                return 'failed'
+            }
+        })
+        .then((result)=>console.log(result))
+        .catch((error)=>{
+            alert("get application/:id error");
+            console.error(error);
+        });
+    };
+
+
     const y = useMotionValue(0);
     const boxShadow = useRaisedShadow(y);
     function handleReorder(event) {
-        console.log('Dragged from index', event.detail.from, 'to', event.detail.to); // debugv0.1.0
 
-        event.detail.complete();
+        console.log('Dragged from index', event.detail.from, 'to', event.detail.to); // debugv0.1.0
+        setAItems(event.detail.complete(A_items));
+        console.log(A_items);
     }
     
-    function toggleReorder() {
-        setIsDisabled((current_state) => !current_state);
-    }
+    /// use effect
+    useEffect(()=>{
+        // get_all_application();
+        get_all_user();
+    },[]);
+
     return (
         <div class="container mx-auto flex flex-col w-full">
             <CheckHeader></CheckHeader>
@@ -39,7 +190,7 @@ function DnD(){
               <p class="text-red-500"><strong>【審查開放時間:113年2月6日至113年6月1日(六)上午12時止】 </strong></p>
               <p><strong>【書面審查評分方式】 </strong></p>
               <ul>
-                  <li class="style1">1.請以序號1~4表示推薦錄取名次等級，排名評分為【1】者表極力推薦優先錄取</li>
+                  <li class="style1">1.請以序號表示推薦錄取名次等級，排名評分為【1】者表極力推薦優先錄取</li>
                   <li class="style1">2.專案A有{A_items.length}名學生申請，專案B有{B_items.length}名學生申請，每個等級可推薦一名(依指導意願排序)</li>
               </ul>
               <Status></Status>
@@ -59,16 +210,16 @@ function DnD(){
                             </div>
                         </div>
                         {/* <tbody class=""> */}
-                            <IonReorderGroup disabled={isDisabled} onIonItemReorder={handleReorder}>
+                            <IonReorderGroup disabled={A_isDisabled} onIonItemReorder={handleReorder}>
                             
-                                {A_items.map((item)=>(
+                                {A_items.map((item,index)=>(
                                     <IonItem >
                                         <div class="bg-stone-300 justify-center">
                                                 <td class="w-24 border border-zinc-950"><IonReorder slot="end"><ion-icon src={DragSign}></ion-icon></IonReorder></td>
-                                                <td class="w-24 border border-zinc-950">{item}</td>
-                                                <td class="w-24 border border-zinc-950">{item}</td>
-                                                <td class="w-24 border border-zinc-950">{item}</td>
-                                                <td class="w-24 border border-zinc-950">{item}</td>
+                                                <td class="w-24 border border-zinc-950">{index+1}</td>
+                                                <td class="w-24 border border-zinc-950 underline"><Link to={`/check-form/${item['user-id']}`}>{item['user-id']}</Link></td>
+                                                <td class="w-24 border border-zinc-950">{item['team']}</td>
+                                                <td class="w-24 border border-zinc-950">{item['advisor']}</td>
                                         </div>
                                     </IonItem>
                                  ))}
@@ -78,8 +229,8 @@ function DnD(){
                         
                     </div>    
                     <div class="flex flex-row justify-evenly mt-4">
-                        <button class="w-24 bg-green-400 rounded-full hover:translate-y-[-4px]" onClick={toggleReorder}>點擊解鎖</button>
-                        <button class="w-24 bg-sky-500 rounded-full hover:translate-y-[-4px]" onClick={toggleReorder}>儲存</button>
+                        <button class="w-24 bg-green-400 rounded-full hover:translate-y-[-4px]" onClick={()=>{setAIsDisabled(!A_isDisabled);}}>點擊解鎖</button>
+                        <button class="w-24 bg-sky-500 rounded-full hover:translate-y-[-4px]" >儲存</button>
                     </div>
                     
                     
@@ -97,27 +248,27 @@ function DnD(){
                             </div>
                         </div>
                         {/* <tbody class=""> */}
-                            <IonReorderGroup disabled={isDisabled} onIonItemReorder={handleReorder}>
+                            <IonReorderGroup disabled={B_isDisabled} onIonItemReorder={handleReorder}>
                             
-                                {A_items.map((item)=>(
-                                    <IonItem >
+                                {/* {A_items.map((item,index)=>(
+                                    <IonItem Reorder key={index}>
                                         <div class="bg-stone-300 justify-center">
                                                 <td class="w-24 border border-zinc-950"><IonReorder slot="end"><ion-icon src={DragSign}></ion-icon></IonReorder></td>
-                                                <td class="w-24 border border-zinc-950">{item}</td>
-                                                <td class="w-24 border border-zinc-950">{item}</td>
-                                                <td class="w-24 border border-zinc-950">{item}</td>
-                                                <td class="w-24 border border-zinc-950">{item}</td>
+                                                <td class="w-24 border border-zinc-950"><IonReorder slot="end"></IonReorder></td>
+                                                <td class="w-24 border border-zinc-950">{item['id']}</td>
+                                                <td class="w-24 border border-zinc-950">{item['team']}</td>
+                                                <td class="w-24 border border-zinc-950">{item['advisor']}</td>
                                         </div>
                                     </IonItem>
-                                 ))}
+                                 ))} */}
                                
                             
                             </IonReorderGroup>
                         
                     </div>    
                     <div class="flex flex-row justify-evenly mt-4">
-                        <button class="w-24 bg-green-400 rounded-full hover:translate-y-[-4px]" onClick={toggleReorder}>點擊解鎖</button>
-                        <button class="w-24 bg-sky-500 rounded-full hover:translate-y-[-4px]" onClick={toggleReorder}>儲存</button>
+                        <button class="w-24 bg-green-400 rounded-full hover:translate-y-[-4px]" onClick={()=>{setBIsDisabled(!B_isDisabled);}}>點擊解鎖</button>
+                        <button class="w-24 bg-sky-500 rounded-full hover:translate-y-[-4px]" onClick={()=>{setAItems(A_items);}}>儲存</button>
                     </div>
                 </div>
             </div>
@@ -126,59 +277,3 @@ function DnD(){
     );
 }
 export default DnD;
-
-
-{/* <Reorder.Group class="relative w-table" axis="y" values={B_items} onReorder={setBItems}>
-{B_items.map((item)=>{
-    <Reorder.Item class="flex justify-between items-center w-full h-52 mb-2.5 py-3.5 px-4.5 rounded-md bg-red flex-shrink-0 cursor-grab" value={item} key={item} style={{ boxShadow, y }}>
-        <Card>
-            <CardBody>
-                <p>Make beautiful websites regardless of your design experience.</p>
-            </CardBody>
-        </Card>
-    </Reorder.Item>
-})}
-</Reorder.Group> */}
-// const DottedButton = () => {
-//     return (
-//       <button className="rounded-2xl border-2 border-dashed border-black bg-white px-6 py-3 font-semibold uppercase text-black transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md hover:shadow-[4px_4px_0px_black] active:translate-x-[0px] active:translate-y-[0px] active:rounded-2xl active:shadow-none">
-//         Hover me
-//       </button>
-//     );
-//   };
-  
-//   export default DottedButton;
-// {/* <IonItem >
-//                                     <td><IonLabel>1</IonLabel></td>
-//                                     <td><IonLabel>王以安</IonLabel></td>
-//                                     <td><IonLabel>1</IonLabel></td>
-//                                     <td><IonReorder slot="end"></IonReorder></td>
-//                                 </IonItem>
-
-//                                 <IonItem >
-//                                     <td><IonLabel>1</IonLabel></td>
-//                                     <td><IonLabel>1</IonLabel></td>
-//                                     <td><IonLabel>1</IonLabel></td>
-//                                     <td><IonReorder slot="end"></IonReorder></td>
-//                                 </IonItem>
-
-//                                 <IonItem >
-//                                     <td><IonLabel>1</IonLabel></td> */}
-                                //     <td><IonLabel>1</IonLabel></td>
-                                //     <td><IonLabel>1</IonLabel></td>
-                                //     <td><IonReorder slot="end"></IonReorder></td>
-                                // </IonItem>
-
-                                // <IonItem >
-                                //     <td><IonLabel>1</IonLabel></td>
-                                //     <td><IonLabel>1</IonLabel></td>
-                                //     <td><IonLabel>1</IonLabel></td>
-                                //     <td><IonReorder slot="end"></IonReorder></td>
-                                // </IonItem>
-
-                                // <IonItem >
-                                //     <td><IonLabel>1</IonLabel></td>
-                                //     <td><IonLabel>1</IonLabel></td>
-                                //     <td><IonLabel>1</IonLabel></td>
-                                //     <td><IonReorder slot="end"></IonReorder></td>
-                                // </IonItem>

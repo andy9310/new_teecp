@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import studentboard from "../images/3D.png";
 import C from "../images/C.png";
 import { Link } from 'react-router-dom';
@@ -6,7 +6,23 @@ import { GlobalContext } from '../context/global';
 import StudentHeader from '../side_components/studentside_header';
 import StudentFooter from '../side_components/studentside_footer';
 import Status from './status';
+import { redirect, useNavigate } from 'react-router-dom';
+import { SessionProvider, useSession } from '../context/session';
+import { getSession } from '../context/utils';
+
 function User() {
+  const { user_session, userName, setUserSession,session_login } = useSession();
+  const navigate = useNavigate();
+  if(user_session===undefined || userName===undefined){
+    navigate('./login');
+  }
+  useEffect(() => {
+    const sessionUser = getSession('user');
+    if (sessionUser) {
+      setUserSession(sessionUser);
+      session_login(sessionUser);
+    }
+}, []);
     return (
       <div class="container mx-auto flex flex-col w-full">
             <StudentHeader></StudentHeader>
