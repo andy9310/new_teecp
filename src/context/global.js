@@ -2,7 +2,7 @@ import React, { createContext, useState } from 'react'
 export const GlobalContext = createContext()
 const GlobalContextProvider = (props) => {
     
-    const url = "http://localhost:8082/api";
+    const url = "https://comm-dev.wegeek.ltd/teecp-backend/api/";
     return (
          <GlobalContext.Provider 
             value={{
