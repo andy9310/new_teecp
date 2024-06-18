@@ -274,6 +274,7 @@ function UserForm() {
     };
 
     const saveBasicProfile = async() => {
+        alert(user_session);
         let request_body = {
             "team": basicProfile['team'],
             "grade": basicProfile['grade'],
