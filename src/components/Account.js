@@ -15,9 +15,20 @@ import trash from "../images/trash.svg";
 import pen from "../images/pen.svg";
 import { Button,Modal} from 'react-bootstrap'; 
 import { GlobalContext } from '../context/global';
-import { useSession } from '../context/session';
-
+import { SessionProvider, useSession } from '../context/session';
+import { getSession } from '../context/utils';
 function Account(){
+    // reset session
+    const { user_session, userName, setUserSession,session_login } = useSession();
+    useEffect(() => {
+        const sessionUser = getSession('user');
+        if (sessionUser) {
+          setUserSession(sessionUser);
+          session_login(sessionUser);
+        }
+    }, []);
+    
+
     /// status reset
     const [reset, setReset] = useState(true);
     const [now_create_advisor, setCreateAdvisor] = useState({
@@ -69,7 +80,6 @@ function Account(){
     const [revisestatus, setReviseStatus] = useState(false);
     const [getAll, setGetAll] = useState(0);
     const { url } = useContext(GlobalContext);
-    const { user_session } = useSession();
 
     const numbers = [1,2,3,4,5];
     const add_board_one = ()=>{
@@ -370,8 +380,10 @@ function Account(){
     }
     // effect 
     useEffect(()=>{
-        get_all_user();
-      },[getAll,reset])
+        if(user_session){
+            get_all_user();
+        }
+    },[getAll,reset,user_session])
 
     return(
         <>

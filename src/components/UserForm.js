@@ -423,7 +423,7 @@ function UserForm() {
 
     const upload_file = async(file,type) => {
         if(file === undefined || file === null){
-            return;
+            return '';
         }
         const formData = new FormData();
         formData.append('file', file);
@@ -639,7 +639,7 @@ function UserForm() {
                 response.text().then(text => {
                     if( JSON.parse(text)['success'] ){
                         alert('delete conference paper success');
-                        getStoredData();
+                        //getStoredData();
                     }
                 })
             }
@@ -1054,96 +1054,98 @@ function UserForm() {
         
         // 
         saveBasicProfile();
-        saveBachelorProfile();
-        saveMasterProfile();
-        savePhdProfile();
+        // saveBachelorProfile();
+        // saveMasterProfile();
+        // savePhdProfile();
         // save form 
         
-        let tmp_form = {...forms};
-        tmp_form["studyResearchPlan"]["path"] = await upload_file(forms['studyResearchPlan']['file'],1);
-        tmp_form["affidavit"]["path"] = await upload_file(forms['affidavit']['file'],1);
-        tmp_form["professorConsentForm"]["path"] = await upload_file(forms['professorConsentForm']['file'],1);
-        setForms( prev => ({ ...prev, 
-            ['studyResearchPlan'] : {'file':forms['studyResearchPlan']['file'] ,'path': tmp_form["studyResearchPlan"]["path"] },
-            ['affidavit']:{'file':forms['affidavit']['file'] ,'path': tmp_form["affidavit"]["path"] },
-            ['professorConsentForm']:{'file':forms['professorConsentForm']['file'] ,'path': tmp_form["professorConsentForm"]["path"]}
-        }) )
-        console.log(tmp_form);
-        saveForms(tmp_form);
+        // let tmp_form = {...forms};
+        // tmp_form["studyResearchPlan"]["path"] = await upload_file(forms['studyResearchPlan']['file'],1);
+        // tmp_form["affidavit"]["path"] = await upload_file(forms['affidavit']['file'],2);
+        // tmp_form["professorConsentForm"]["path"] = await upload_file(forms['professorConsentForm']['file'],3);
+        // setForms( prev => ({ ...prev, 
+        //     ['studyResearchPlan'] : {'file':forms['studyResearchPlan']['file'] ,'path': tmp_form["studyResearchPlan"]["path"] },
+        //     ['affidavit']:{'file':forms['affidavit']['file'] ,'path': tmp_form["affidavit"]["path"] },
+        //     ['professorConsentForm']:{'file':forms['professorConsentForm']['file'] ,'path': tmp_form["professorConsentForm"]["path"]}
+        // }) )
+        // console.log(tmp_form);
+        // saveForms(tmp_form);
 
         // save transcript 
 
-        let tmp_transcript = {...transcript};
-        tmp_transcript['bachelorTranscript']['path'] = await upload_file(transcript['bachelorTranscript']['file'],1); 
-        tmp_transcript['masterTranscript']['path'] = await upload_file(transcript['masterTranscript']['file'],1); 
-        tmp_transcript['phdTranscript']['path'] = await upload_file(transcript['phdTranscript']['file'],1); 
-        setTranscript( prev => ({ ...prev, 
-            ['bachelorTranscript'] : {'file': transcript['bachelorTranscript']['file'] ,'path': tmp_transcript['bachelorTranscript']['path'] },
-            ['masterTranscript']:{'file': transcript['masterTranscript']['file'] ,'path': tmp_transcript['masterTranscript']['path'] },
-            ['phdTranscript']:{'file': transcript['phdTranscript']['file'] ,'path': tmp_transcript['phdTranscript']['path'] }
-        }) )
-        saveTranscript(tmp_transcript);
+        // let tmp_transcript = {...transcript};
+        // tmp_transcript['bachelorTranscript']['path'] = await upload_file(transcript['bachelorTranscript']['file'],4); 
+        // tmp_transcript['masterTranscript']['path'] = await upload_file(transcript['masterTranscript']['file'],5); 
+        // tmp_transcript['phdTranscript']['path'] = await upload_file(transcript['phdTranscript']['file'],6); 
+        // setTranscript( prev => ({ ...prev, 
+        //     ['bachelorTranscript'] : {'file': transcript['bachelorTranscript']['file'] ,'path': tmp_transcript['bachelorTranscript']['path'] },
+        //     ['masterTranscript']:{'file': transcript['masterTranscript']['file'] ,'path': tmp_transcript['masterTranscript']['path'] },
+        //     ['phdTranscript']:{'file': transcript['phdTranscript']['file'] ,'path': tmp_transcript['phdTranscript']['path'] }
+        // }) )
+        // saveTranscript(tmp_transcript);
 
         // save rank certificate
         // upload_file(certificate['bachelorRanking']['file']).then((response) => {setForms( prev => ({ ...prev, ['bachelorRanking']:{'file':certificate['bachelorRanking']['file'] ,'path': response }}) )}); // revise
         // upload_file(certificate['masterRanking']['file']).then((response) => {setForms( prev => ({ ...prev, ['masterRanking']:{'file':certificate['masterRanking']['file'] ,'path': response }}) )}); // revise
         // upload_file(certificate['phdRanking']['file']).then((response) => {setForms( prev => ({ ...prev, ['phdRanking']:{'file':certificate['phdRanking']['file'] ,'path': response }}) )}); // revise
         
-        let tmp_certificate = {...certificate};
-        tmp_certificate['bachelorRanking']['path'] = await upload_file(certificate['bachelorRanking']['file'],1); 
-        tmp_certificate['masterRanking']['path'] = await upload_file(certificate['masterRanking']['file'],1); 
-        tmp_certificate['phdRanking']['path'] = await upload_file(certificate['phdRanking']['file'],1); 
-        setCertificate( prev => ({ ...prev, 
-            ['bachelorRanking'] : {'file': certificate['bachelorRanking']['file'] ,'path': tmp_certificate['bachelorRanking']['path'] },
-            ['masterRanking']:{'file': certificate['masterRanking']['file'] ,'path': tmp_certificate['masterRanking']['path'] },
-            ['phdRanking']:{'file': certificate['phdRanking']['file'] ,'path': tmp_certificate['phdRanking']['path'] }
-        }) )
-        saveRankCertificate(tmp_transcript);
+        // let tmp_certificate = {...certificate};
+        // tmp_certificate['bachelorRanking']['path'] = await upload_file(certificate['bachelorRanking']['file'],7); 
+        // tmp_certificate['masterRanking']['path'] = await upload_file(certificate['masterRanking']['file'],8); 
+        // tmp_certificate['phdRanking']['path'] = await upload_file(certificate['phdRanking']['file'],9); 
+        // setCertificate( prev => ({ ...prev, 
+        //     ['bachelorRanking'] : {'file': certificate['bachelorRanking']['file'] ,'path': tmp_certificate['bachelorRanking']['path'] },
+        //     ['masterRanking']:{'file': certificate['masterRanking']['file'] ,'path': tmp_certificate['masterRanking']['path'] },
+        //     ['phdRanking']:{'file': certificate['phdRanking']['file'] ,'path': tmp_certificate['phdRanking']['path'] }
+        // }) )
+        // saveRankCertificate(tmp_transcript);
 
         // save conference paper
         
-        let tmp_conferencePaper = [...conferencePapers];
-        conferencePapers.map( async (x,index) => { 
-            tmp_conferencePaper[index]['attachment'] = await upload_file( conferencePapers_file[index],1);
-            saveConferencePaper(tmp_conferencePaper,index); 
-        });
-        setConferencePaper( tmp_conferencePaper );
+        // let tmp_conferencePaper = [...conferencePapers];
+        // conferencePapers.map( async (x,index) => { 
+        //     tmp_conferencePaper[index]['attachment'] = await upload_file( conferencePapers_file[index],10);
+        //     saveConferencePaper(tmp_conferencePaper,index); 
+        // });
+        // setConferencePaper( tmp_conferencePaper );
 
-        // save research project
+        // // save research project
 
-        let tmp_researchProjects = [...researchProjects];
-        researchProjects.map( async (x,index) => { 
-            tmp_researchProjects[index]['attachment'] = await upload_file( researchProjects_file[index],1);
-            saveResearchProject(tmp_researchProjects,index); 
-        });
-        setResearchProjects( tmp_researchProjects );
+        // let tmp_researchProjects = [...researchProjects];
+        // researchProjects.map( async (x,index) => { 
+        //     tmp_researchProjects[index]['attachment'] = await upload_file( researchProjects_file[index],11);
+        //     saveResearchProject(tmp_researchProjects,index); 
+        // });
+        // setResearchProjects( tmp_researchProjects );
 
-        // save courseProjects
+        // // save courseProjects
         
-        let tmp_courseProjects = [...courseProjects];
-        courseProjects.map( async (x,index) => { 
-            tmp_courseProjects[index]['attachment'] = await upload_file( courseProjects_file[index],1);
-            saveCourseProject(tmp_courseProjects,index); 
-        });
-        setCourseProjects( tmp_courseProjects );
+        // let tmp_courseProjects = [...courseProjects];
+        // courseProjects.map( async (x,index) => { 
+        //     tmp_courseProjects[index]['attachment'] = await upload_file( courseProjects_file[index],12);
+        //     saveCourseProject(tmp_courseProjects,index); 
+        // });
+        // setCourseProjects( tmp_courseProjects );
 
-        // save language certificate
+        // // save language certificate
 
-        let tmp_languageCertificate = [...languageCertificate];
-        languageCertificate.map( async (x,index) => { 
-            tmp_languageCertificate[index]['attachment'] = await upload_file( languageCertificate_file[index],1);
-            saveLanguageCertificate(tmp_languageCertificate,index); 
-        });
-        setLanguageCertificate( tmp_languageCertificate );
+        // let tmp_languageCertificate = [...languageCertificate];
+        // languageCertificate.map( async (x,index) => { 
+        //     tmp_languageCertificate[index]['attachment'] = await upload_file( languageCertificate_file[index],13);
+        //     saveLanguageCertificate(tmp_languageCertificate,index); 
+        // });
+        // setLanguageCertificate( tmp_languageCertificate );
 
-        // save additional document
+        // // save additional document
         
-        let tmp_additionalDocument = [...additionalDocument];
-        additionalDocument.map( async (x,index) => { 
-            tmp_additionalDocument[index]['attachment'] = await upload_file( additionalDocument_file[index],1);
-            saveAdditionalDocument(tmp_additionalDocument,index); 
-        });
-        setAdditionalDocument( tmp_additionalDocument );
+        // let tmp_additionalDocument = [...additionalDocument];
+        // additionalDocument.map( async (x,index) => { 
+        //     tmp_additionalDocument[index]['attachment'] = await upload_file( additionalDocument_file[index],14);
+        //     saveAdditionalDocument(tmp_additionalDocument,index); 
+        // });
+        // setAdditionalDocument( tmp_additionalDocument );
+        
+        ///// endline
 
         // upload_file(forms['studyResearchPlan']['file']).then((response) => { 
         //     tmp_form["studyResearchPlan"]["path"] = response;
@@ -1205,61 +1207,8 @@ function UserForm() {
             setPrint(true);
         }
     };
-    const Seminar = React.memo((props) => {
-        return(
-            <div class="rounded-md border border-black my-1 mx-1 p-1" >
-                <div class="flex flex-column justify-between p-1">
-                    <h1 class="font-bold">研討會論文{props.number+1}</h1>
-                    <button type="button" class="h-5 w-5 m-2" onClick={()=>{deleteConferencePaper(props.number);}}><ion-icon size="large" src={delete_sign}></ion-icon></button>
-                </div>
-                <h2 class="p-1" >研討會名稱</h2>
-                <div class="p-1">
-                    <input onChange={(e) => {
-                        const newData = [...conferencePapers];
-                        newData[props.number]['conferenceName'] = e.target.value;
-                        // getBase64(e.target.files[0]);
-                        setConferencePaper(newData);
-                    }}
-                    value={props.paper['conferenceName']}
-                    type='text' class=" outline-none p-1.25 text-base border-b-2 w-full"   >
-                    </input>
-                </div>
-                <h2 class="p-1">論文名稱</h2>
-                <div class="p-1">
-                    <input onChange={(e) => {
-                        const newData = [...conferencePapers];
-                        newData[props.number]['paperName'] = e.target.value;
-                        // getBase64(e.target.files[0]);
-                        setConferencePaper(newData);
-                    }}
-                    value={props.paper['paperName']}
-                    type='text' class=" outline-none p-1.25 text-base border-b-2 w-full"   ></input>
-                </div>
-                <h2 class="p-1">作者群</h2>
-                <div class="p-1">
-                    <input onChange={(e) => {
-                        const newData = [...conferencePapers];
-                        newData[props.number]['authors'] = e.target.value;
-                        // getBase64(e.target.files[0]);
-                        setConferencePaper(newData);
-                    }}
-                    value={props.paper['authors']}
-                    type='text' class=" outline-none p-1.25 text-base border-b-2 w-full"   ></input>
-                </div>
-                <div >
-                    <h3 class="p-1" >論文上傳</h3>
-                    <input onChange={(e) => {
-                        const newData = [...conferencePapers_file];
-                        newData[props.number] = e.target.files[0];
-                        // getBase64(e.target.files[0]);
-                        setConferencePaperFiles(newData);
-                    }}
-                    // value={ props.paper['attachment'] }
-                    type="file" class=" outline-none p-1.5 text-base border-b-2 w-full" ></input>
-                </div>
-            </div>
-        );
-    });
+
+    
     function TeachPlan(props){
         return(
             <details class="rounded-md border border-black my-1 mx-1 p-1">
@@ -1750,7 +1699,7 @@ function UserForm() {
                                 }} 
                                 type="file" class=" outline-none p-1.5 text-base border-b-2 w-full" ></input>
                             <h1>已儲存 : {forms["affidavit"]["path"]}</h1>
-                            <h1>儲存時間 : {time}</h1>
+                            <h1>儲存時間 : {forms["affidavit"]["path"]!==''?time:''}</h1>
                             </div>
                             
                             
@@ -1772,7 +1721,7 @@ function UserForm() {
                                 // value={ forms['professorConsentForm']['path'] }
                                 type="file" class=" outline-none p-1.5 text-base border-b-2 w-full"></input>
                             <h1>已儲存 : {forms["professorConsentForm"]["path"]}</h1>
-                            <h1>儲存時間 : {time}</h1>
+                            <h1>儲存時間 : {forms["professorConsentForm"]["path"]!==''?time:''}</h1>
                             </div>
                             
                         </div>
@@ -1792,8 +1741,8 @@ function UserForm() {
                                 }} 
                                 // value={ forms['studyResearchPlan']['path'] }
                                 type="file" class=" outline-none p-1.5 text-base border-b-2 w-full"></input>
-                            <h1>已儲存 : {forms["studyResearchPlan"]["path"]}</h1>
-                            <h1>儲存時間 : {time}</h1>
+                            <h1>已儲存 : {forms["studyResearchPlan"]["path"]==='/'?'':forms["studyResearchPlan"]["path"]}</h1>
+                            <h1>儲存時間 : {(forms["studyResearchPlan"]["path"]!=='/'&&forms["studyResearchPlan"]["path"]!=='')?time:''}</h1>
                             </div>
                             
                         </div>
@@ -1814,7 +1763,7 @@ function UserForm() {
                                 // value={ transcript['bachelorTranscript']['path'] }
                                 type="file" class=" outline-none p-1.5 text-base border-b-2 w-full" ></input>
                                 <h1>已儲存 : {transcript["bachelorTranscript"]["path"]}</h1>
-                                <h1>儲存時間 : {time}</h1>
+                                <h1>儲存時間 : {transcript["bachelorTranscript"]["path"]!==''?time:''}</h1>
                             </div>
                             <div class="p-1.5">
                                 <h3>碩士歷年成績單上傳</h3>
@@ -1827,7 +1776,7 @@ function UserForm() {
                                 // value={ transcript['masterTranscript']['path'] }
                                 type="file" class=" outline-none p-1.5 text-base border-b-2 w-full" ></input>
                                 <h1>已儲存 : {transcript["masterTranscript"]["path"]}</h1>
-                                <h1>儲存時間 : {time}</h1>
+                                <h1>儲存時間 : {transcript["masterTranscript"]["path"]!==''?time:''}</h1>
                             </div>
                             <div class="p-1.5">
                                 <h3>博士歷年成績單上傳</h3>
@@ -1840,7 +1789,7 @@ function UserForm() {
                                 // value={ transcript['phdTranscript']['path'] }
                                 type="file" class=" outline-none p-1.5 text-base border-b-2 w-full" ></input>
                                 <h1>已儲存 : {transcript["phdTranscript"]["path"]}</h1>
-                                <h1>儲存時間 : {time}</h1>
+                                <h1>儲存時間 : {transcript["phdTranscript"]["path"]!==''?time:''}</h1>
                             </div>
                         </div>
                     </div>
@@ -1860,7 +1809,7 @@ function UserForm() {
                                 // value={ certificate['bachelorRanking']['path'] }
                                 type="file" class=" outline-none p-1.5 text-base border-b-2 w-full" ></input>
                                 <h1>已儲存 : {certificate["bachelorRanking"]["path"]}</h1>
-                                <h1>儲存時間 : {time}</h1>
+                                <h1>儲存時間 : {certificate["bachelorRanking"]["path"]!==''?time:''}</h1>
                             </div>
                             <div class="p-1.5">
                                 <h3>碩士名次證明書上傳</h3>
@@ -1872,7 +1821,7 @@ function UserForm() {
                                 }}
                                 type="file" class=" outline-none p-1.5 text-base border-b-2 w-full" ></input>
                                 <h1>已儲存 : {certificate["masterRanking"]["path"]}</h1>
-                                <h1>儲存時間 : {time}</h1>
+                                <h1>儲存時間 : {certificate["masterRanking"]["path"]!==''?time:''}</h1>
                             </div>
                             <div class="p-1.5">
                                 <h3>博士名次證明書上傳</h3>
@@ -1884,7 +1833,7 @@ function UserForm() {
                                 }}
                                 type="file" class=" outline-none p-1.5 text-base border-b-2 w-full" ></input>
                                 <h1>已儲存 : {certificate["phdRanking"]["path"]}</h1>
-                                <h1>儲存時間 : {time}</h1>
+                                <h1>儲存時間 : {certificate["phdRanking"]["path"]!==''?time:''}</h1>
                             </div>
                             
                         </div>
@@ -1894,7 +1843,62 @@ function UserForm() {
                             <h1 class="font-bold text-left">⑩ 研討會論文<span class="text-red-500 text-base">（無則免填）</span></h1>
                         </div>
                         <div class="m-2 md:grid-cols-1 w-10/12 grid bg-white ">
-                            { conferencePapers.map((x,index ) => <Seminar paper={x} number={index}/>)} 
+                            { conferencePapers.map((x,index ) => 
+                                <details class="rounded-md border border-black my-1 mx-1 p-1">
+                                <summary >研討會論文{index+1}</summary>
+                                <div class="flex flex-column justify-between p-1">
+                                    <h1 class="font-bold">研討會論文{index+1}</h1>
+                                    <button type="button" class="h-5 w-5 m-2" onClick={()=>{deleteConferencePaper(index);}}><ion-icon size="large" src={delete_sign}></ion-icon></button>
+                                </div>
+                                <h2 class="p-1" >研討會名稱</h2>
+                                <div class="p-1">
+                                    <input onChange={(e) => {
+                                        const newData = [...conferencePapers];
+                                        newData[index]['conferenceName'] = e.target.value;
+                                        // getBase64(e.target.files[0]);
+                                        setConferencePaper(newData);
+                                    }}
+                                    value={x['conferenceName']}
+                                    type='text' class=" outline-none p-1.25 text-base border-b-2 w-full"   >
+                                    </input>
+                                </div>
+                                <h2 class="p-1">論文名稱</h2>
+                                <div class="p-1">
+                                    <input onChange={(e) => {
+                                        const newData = [...conferencePapers];
+                                        newData[index]['paperName'] = e.target.value;
+                                        // getBase64(e.target.files[0]);
+                                        setConferencePaper(newData);
+                                    }}
+                                    value={x['paperName']}
+                                    type='text' class=" outline-none p-1.25 text-base border-b-2 w-full"   ></input>
+                                </div>
+                                <h2 class="p-1">作者群</h2>
+                                <div class="p-1">
+                                    <input onChange={(e) => {
+                                        const newData = [...conferencePapers];
+                                        newData[index]['authors'] = e.target.value;
+                                        // getBase64(e.target.files[0]);
+                                        setConferencePaper(newData);
+                                    }}
+                                    value={x['authors']}
+                                    type='text' class=" outline-none p-1.25 text-base border-b-2 w-full"   ></input>
+                                </div>
+                                <div >
+                                    <h3 class="p-1" >論文上傳</h3>
+                                    <input onChange={(e) => {
+                                        const newData = [...conferencePapers_file];
+                                        newData[index] = e.target.files[0];
+                                        // getBase64(e.target.files[0]);
+                                        setConferencePaperFiles(newData);
+                                    }}
+                                    // value={ props.paper['attachment'] }
+                                    type="file" class=" outline-none p-1.5 text-base border-b-2 w-full" ></input>
+                                    {/* <h1>已儲存 : {conferencePapers["attachment"]["path"]}</h1>
+                                    <h1>儲存時間 : {conferencePapers["attachment"]["path"]!==''?time:''}</h1> */}
+                                </div>
+                            </details>
+                            )} 
                             <button type="button" class="h-10 w-10" onClick={ addConferencePaper }><ion-icon size="large" src={add_sign}></ion-icon></button>        
                         </div>
                     </div>

@@ -1,13 +1,21 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext,useEffect } from 'react';
 import checkboard from "../images/3C.png";
 import C from "../images/C.png";
 import { Link } from 'react-router-dom';
 import Status from './status';
 import CheckHeader from '../side_components/checkside_header';
 import CheckFooter from '../side_components/checkside_footer';
+import { SessionProvider, useSession } from '../context/session';
+import { getSession } from '../context/utils';
 
 function Check() {
-    
+      const { setUserSession,session_login } = useSession();
+      useEffect(() => {
+        const sessionUser = getSession('user');
+        if (sessionUser) {
+          session_login(sessionUser);
+        }
+    }, []);
     return (
       <div class="container mx-auto flex flex-col w-full">
             <CheckHeader></CheckHeader>

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import checkboard from "../images/3C.png";
 import accountManage from "../images/3B.png";
 import system from "../images/3E.png";
@@ -7,9 +7,17 @@ import { Link } from 'react-router-dom';
 import Status from './status';
 import AdminHeader from '../side_components/adminside_header';
 import AdminFooter from '../side_components/adminside_footer';
+import { SessionProvider, useSession } from '../context/session';
+import { getSession } from '../context/utils';
 
 function Admin() {
-    
+    const { user_session, userName, setUserSession,session_login } = useSession();
+    useEffect(() => {
+        const sessionUser = getSession('user');
+        if (sessionUser) {
+          session_login(sessionUser);
+        }
+    }, []);
     return (
         <div class="container mx-auto flex flex-col w-full">
             <AdminHeader></AdminHeader>

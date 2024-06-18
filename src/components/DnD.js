@@ -16,98 +16,24 @@ import DragSign from "../images/reorder-four.svg";
 import { useSession } from '../context/session';
 import { GlobalContext } from '../context/global';
 import { redirect, useNavigate, Link } from 'react-router-dom';
+import { getSession } from '../context/utils';
 
 function DnD(){
-    const navigate = useNavigate();
+
     const { url } = useContext(GlobalContext);
-    const { user_session, userId, studentNumber } = useSession();
+    const { user_session, userId ,session_login, userName } = useSession();
     // user meta data
     const [studentA_array, setStudentA_Array] = useState([]);
     const [studentB_array, setStudentB_Array] = useState([]);
     // A B 
-    const [A_items, setAItems] = useState([{
-        "user-id":12,
-        "app-id":2,
-        "team":'CSP',
-        "advisor":'楊鈞安',
-    }]);
-    const [B_items, setBItems] = useState([]);
     const [A_isDisabled, setAIsDisabled] = useState(true);
     const [B_isDisabled, setBIsDisabled] = useState(true);
+    // store status
+    const [AstoreStatus, setAStoreStatus] = useState(false);
+    const [BstoreStatus, setBStoreStatus] = useState(false);
 
-    /// get all user
-    const get_all_user = async() => {
-        let getHeader = {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            // "Authorization": `Bearer ${user_session}`,
-        }
-        const requestOptions = {
-            method: "GET",
-            headers: getHeader,
-            redirect: "follow",
-        }
-        await fetch(url+'/user/',requestOptions)
-        .then((response)=>{
-            if(response.status == "200"){
-                response.text().then(text => {
-
-                    console.log(JSON.parse(text));  
-                    const student_array = JSON.parse(text).filter(user =>('student' in user) && user['student']['studentNumber']!=="");
-                    student_array .map((student)=>{ getAllData(student['id']) })
-                    //setStudentA_Array(JSON.parse(text).filter(application =>  application["applicationForm"]["basicProfile"]["applicationType"] === "A"));
-                    //setStudentB_Array(JSON.parse(text).filter(application =>  application["applicationForm"]["basicProfile"]["applicationType"] === "B"));
-                    alert("get user metadata success");
-                })
-            }
-            else{
-                alert("get user metadata failed");
-            }
-        })
-        .then((result)=>console.log(result))
-        .catch((error)=>{
-            alert("get user metadata error");
-            console.error(error);
-        });
-    }
-    
-    /// get all application metadata 
-    // const get_all_application = async() =>{
-    //     let getHeader = {
-    //         "Content-Type": "application/json",
-    //         "Accept": "application/json",
-    //         "Authorization": `Bearer ${user_session}`,
-    //     }
-    //     const requestOptions = {
-    //         method: "GET",
-    //         headers: getHeader,
-    //         redirect: "follow",
-    //     }
-    //     await fetch(url+'/application/',requestOptions)
-    //     .then((response)=>{
-    //         if(response.status == "200"){
-    //             response.text().then(text => {
-
-    //                 console.log(JSON.parse(text));  
-    //                 // JSON.parse(text).map((student)=>{ getAllData(student['id']) })
-    //                 //setStudentA_Array(JSON.parse(text).filter(application =>  application["applicationForm"]["basicProfile"]["applicationType"] === "A"));
-    //                 //setStudentB_Array(JSON.parse(text).filter(application =>  application["applicationForm"]["basicProfile"]["applicationType"] === "B"));
-    //                 alert("get user metadata success");
-    //             })
-    //         }
-    //         else{
-    //             alert("get user metadata failed");
-    //         }
-    //     })
-    //     .then((result)=>console.log(result))
-    //     .catch((error)=>{
-    //         alert("get user metadata error");
-    //         console.error(error);
-    //     });
-    // }
-
-    /// get all application data
-    const getAllData = async(id) => {
+    // get all application data
+    const getAllData = async() => {
         let getHeader = {
             "Content-Type": "application/json",
             "Accept": "application/json",
@@ -118,40 +44,40 @@ function DnD(){
             headers: getHeader,
             redirect: "follow",
         }
-        let id_string = id.toString();
-        await fetch(url+'/application/'+id_string,requestOptions)
+        await fetch(url+'/application/',requestOptions)
         .then((response)=>{
 
             if(response.status == "200" ){
                 response.text().then(text => {
-                    //console.log(JSON.parse(text)['name']);  // important
                     // set the data
                     console.log(JSON.parse(text));
-                    if(JSON.parse(text)['applicationForm']['basicProfile']['applicationType'] === "A"){
-                        
-                        let item = {
-                            "user-id":id,
-                            "app-id":JSON.parse(text)['id'],
-                            "team":JSON.parse(text)['applicationForm']['basicProfile']['team'],
-                            "advisor":JSON.parse(text)['applicationForm']['basicProfile']['advisor'],
-                        }
-                        console.log([...A_items, item]);
-                        setAItems([...A_items, item])
+                    let check = false;
+                    if('scores' in JSON.parse(text)[0]){ // save before
+                        JSON.parse(text).map((application)=>{
+                            if(application['scores'].filter(score=>score['reviewer']===userName).length!==0){
+                                check = true;
+                            }
+                        })
                     }
-                    else if(JSON.parse(text)['applicationForm']['basicProfile']['applicationType'] === "B"){
-                        let item = {
-                            "user-id":id,
-                            "id":JSON.parse(text)['id'],
-                            "team":JSON.parse(text)['applicationForm']['basicProfile']['team'],
-                            "advisor":JSON.parse(text)['applicationForm']['basicProfile']['advisor'],
-                        }
-                        setBItems([...B_items, item])
-                    }else{
-                        console.log("no type found");
+                    if(check === false){
+                        setStudentA_Array(JSON.parse(text).filter(application =>  application["applicationForm"]["basicProfile"]["applicationType"] === "A" ));
+                        setStudentB_Array(JSON.parse(text).filter(application =>  application["applicationForm"]["basicProfile"]["applicationType"] === "B"));
+                    }
+                    else{
+
+                        setStudentA_Array(JSON.parse(text).filter(application =>  application["applicationForm"]["basicProfile"]["applicationType"] === "A" ).sort(function(a,b){
+                            let a_rank = a['scores'].filter(score=>score['reviewer']===userName);
+                            let b_rank = b['scores'].filter(score=>score['reviewer']===userName);
+                            return a_rank > b_rank;
+                        }))
+                        setStudentB_Array(JSON.parse(text).filter(application =>  application["applicationForm"]["basicProfile"]["applicationType"] === "B" ).sort(function(a,b){
+                            let a_rank = a['scores'].filter(score=>score['reviewer']===userName);
+                            let b_rank = b['scores'].filter(score=>score['reviewer']===userName);
+                            return a_rank > b_rank;
+                        }))
                     }
                     
                 })
-                // alert("fetch stored application data success");
                 return 'success'
             }
             else{
@@ -165,22 +91,115 @@ function DnD(){
             console.error(error);
         });
     };
+    const convert_rank = ()=>{
+        
+    }
+    const sendScore = async(id,index)=>{
+        let request_body = {
+            "rank": index+1,
+            "reviewerId":userId
+        }
+        let postHeader = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": `Bearer ${user_session}`,
+        }
+        const requestOptions = {
+            method: "POST",
+            headers: postHeader,
+            redirect: "follow",
+            body: JSON.stringify(request_body)
+        }
+        await fetch(url+'/score/'+id.toString(),requestOptions)
+        .then((response)=>{
+            if(response.status == "200" ){
+                alert("store score success");
+                return 'success'
+            }
+            else{
+                alert("store score failed");
+                return 'failed'
+            }
+        })
+        .then((result)=>console.log(result))
+        .catch((error)=>{
+            alert("store scoreerror");
+            console.error(error);
+        });
 
+    }
 
     const y = useMotionValue(0);
     const boxShadow = useRaisedShadow(y);
     function handleReorder(event) {
-
         console.log('Dragged from index', event.detail.from, 'to', event.detail.to); // debugv0.1.0
-        setAItems(event.detail.complete(A_items));
-        console.log(A_items);
+        setStudentA_Array(event.detail.complete(studentA_array));
+        console.log(studentA_array);
     }
+
+    // // get all score api
+    // const get_all_score = async() =>{
+    //     let getHeader = {
+    //         "Content-Type": "application/json",
+    //         "Accept": "application/json",
+    //         "Authorization": `Bearer ${user_session}`,
+    //     }
+    //     const requestOptions = {
+    //         method: "GET",
+    //         headers: getHeader,
+    //         redirect: "follow",
+    //     }
+    //     await fetch(url+'/score/',requestOptions)
+    //     .then((response)=>{
+    //         if(response.status == "200"){
+    //             response.text().then(text => {
+    //                 console.log(JSON.parse(text));  
+    //                 let sort_score = JSON.parse(text).filter(score=>score['reviewer']===userName);
+    //                 sort_score.sort(function(a,b){
+                        
+    //                 });
+    //                 alert("get all score success");
+    //             })
+    //         }
+    //         else{
+    //             alert("get all score failed");
+    //             getAllData();
+    //         }
+    //     })
+    //     .then((result)=>console.log(result))
+    //     .catch((error)=>{
+    //         alert("get all score error");
+    //         console.error(error);
+    //     });
+       
+    // };
     
     /// use effect
     useEffect(()=>{
-        // get_all_application();
-        get_all_user();
+        const sessionUser = getSession('user');
+        if (sessionUser) {
+            session_login(sessionUser);
+        }
     },[]);
+    useEffect(()=>{
+        if(user_session){
+            getAllData();
+        }
+    },[user_session]);
+    useEffect(()=>{
+        if(AstoreStatus === true){
+            studentA_array.map((item,index)=>{
+                sendScore(item['id'],index);
+            });
+        }
+    },[AstoreStatus]);
+    useEffect(()=>{
+        if(BstoreStatus === true){
+            studentB_array.map((item,index)=>{
+                sendScore(item['id'],index);
+            });
+        }
+    },[BstoreStatus]);
 
     return (
         <div class="container mx-auto flex flex-col w-full">
@@ -191,7 +210,7 @@ function DnD(){
               <p><strong>【書面審查評分方式】 </strong></p>
               <ul>
                   <li class="style1">1.請以序號表示推薦錄取名次等級，排名評分為【1】者表極力推薦優先錄取</li>
-                  <li class="style1">2.專案A有{A_items.length}名學生申請，專案B有{B_items.length}名學生申請，每個等級可推薦一名(依指導意願排序)</li>
+                  <li class="style1">2.專案A有{studentA_array.length}名學生申請，專案B有{studentB_array.length}名學生申請，每個等級可推薦一名(依指導意願排序)</li>
               </ul>
               <Status></Status>
             </div>
@@ -212,14 +231,14 @@ function DnD(){
                         {/* <tbody class=""> */}
                             <IonReorderGroup disabled={A_isDisabled} onIonItemReorder={handleReorder}>
                             
-                                {A_items.map((item,index)=>(
+                                {studentA_array.map((item,index)=>(
                                     <IonItem >
                                         <div class="bg-stone-300 justify-center">
                                                 <td class="w-24 border border-zinc-950"><IonReorder slot="end"><ion-icon src={DragSign}></ion-icon></IonReorder></td>
                                                 <td class="w-24 border border-zinc-950">{index+1}</td>
-                                                <td class="w-24 border border-zinc-950 underline"><Link to={`/check-form/${item['user-id']}`}>{item['user-id']}</Link></td>
-                                                <td class="w-24 border border-zinc-950">{item['team']}</td>
-                                                <td class="w-24 border border-zinc-950">{item['advisor']}</td>
+                                                <td class="w-24 border border-zinc-950 underline"><Link to={`/check-form/${item['id']}`}>{item['id']}</Link></td>
+                                                <td class="w-24 border border-zinc-950">{item['applicationForm']['basicProfile']['team']}</td>
+                                                <td class="w-24 border border-zinc-950">{item['applicationForm']['basicProfile']['advisor']}</td>
                                         </div>
                                     </IonItem>
                                  ))}
@@ -230,7 +249,7 @@ function DnD(){
                     </div>    
                     <div class="flex flex-row justify-evenly mt-4">
                         <button class="w-24 bg-green-400 rounded-full hover:translate-y-[-4px]" onClick={()=>{setAIsDisabled(!A_isDisabled);}}>點擊解鎖</button>
-                        <button class="w-24 bg-sky-500 rounded-full hover:translate-y-[-4px]" >儲存</button>
+                        <button class="w-24 bg-sky-500 rounded-full hover:translate-y-[-4px]" onClick={()=>{setStudentA_Array(studentA_array);setAStoreStatus(true);}}>儲存</button>
                     </div>
                     
                     
@@ -250,17 +269,17 @@ function DnD(){
                         {/* <tbody class=""> */}
                             <IonReorderGroup disabled={B_isDisabled} onIonItemReorder={handleReorder}>
                             
-                                {/* {A_items.map((item,index)=>(
-                                    <IonItem Reorder key={index}>
-                                        <div class="bg-stone-300 justify-center">
-                                                <td class="w-24 border border-zinc-950"><IonReorder slot="end"><ion-icon src={DragSign}></ion-icon></IonReorder></td>
-                                                <td class="w-24 border border-zinc-950"><IonReorder slot="end"></IonReorder></td>
-                                                <td class="w-24 border border-zinc-950">{item['id']}</td>
-                                                <td class="w-24 border border-zinc-950">{item['team']}</td>
-                                                <td class="w-24 border border-zinc-950">{item['advisor']}</td>
-                                        </div>
-                                    </IonItem>
-                                 ))} */}
+                                {studentB_array.map((item,index)=>(
+                                    <IonItem >
+                                    <div class="bg-stone-300 justify-center">
+                                            <td class="w-24 border border-zinc-950"><IonReorder slot="end"><ion-icon src={DragSign}></ion-icon></IonReorder></td>
+                                            <td class="w-24 border border-zinc-950">{index+1}</td>
+                                            <td class="w-24 border border-zinc-950 underline"><Link to={`/check-form/${item['id']}`}>{item['id']}</Link></td>
+                                            <td class="w-24 border border-zinc-950">{item['applicationForm']['basicProfile']['team']}</td>
+                                            <td class="w-24 border border-zinc-950">{item['applicationForm']['basicProfile']['advisor']}</td>
+                                    </div>
+                                </IonItem>
+                                 ))}
                                
                             
                             </IonReorderGroup>
@@ -268,7 +287,7 @@ function DnD(){
                     </div>    
                     <div class="flex flex-row justify-evenly mt-4">
                         <button class="w-24 bg-green-400 rounded-full hover:translate-y-[-4px]" onClick={()=>{setBIsDisabled(!B_isDisabled);}}>點擊解鎖</button>
-                        <button class="w-24 bg-sky-500 rounded-full hover:translate-y-[-4px]" onClick={()=>{setAItems(A_items);}}>儲存</button>
+                        <button class="w-24 bg-sky-500 rounded-full hover:translate-y-[-4px]" onClick={()=>{setStudentB_Array(studentB_array);setBStoreStatus(true);}}>儲存</button>
                     </div>
                 </div>
             </div>

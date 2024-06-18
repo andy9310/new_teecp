@@ -12,23 +12,19 @@ import Status from './status';
 import { useSession } from '../context/session';
 import { GlobalContext } from '../context/global';
 import { useNavigate,useParams } from 'react-router-dom';
-
+import { getSession } from '../context/utils';
 
 function CheckForm() {
-    const { id } = useParams();
-
+    const { id } = useParams(); // application id
+    
     // gobal
     const { url } = useContext(GlobalContext);
-    const { user_session } = useSession();
-    const navigate = useNavigate();
-    if(user_session===undefined ){
-        navigate('./login');
-    }
-
-
+    const { user_session,session_login } = useSession();
+    const [userid, setUser_Id] = useState(null);
+    
     // application id
     const [applicationId, setApplicationId] = useState(0);
-    
+
     // submit status
     const [status, setStatus] = useState(false);
     const [sendTime, setSendTime] = useState('');
@@ -146,7 +142,7 @@ function CheckForm() {
     const [print_disable, setPrint] = useState(true);
     const [submit_disable, setSubmit] = useState(false);
 
-    const getStoredData = async() => {
+    const getAllData = async() => {
         let getHeader = {
             "Content-Type": "application/json",
             "Accept": "application/json",
@@ -157,102 +153,102 @@ function CheckForm() {
             headers: getHeader,
             redirect: "follow",
         }
-        let id_string = id.toString();
-        await fetch(url+'/application/'+id_string,requestOptions)
+        await fetch(url+'/application/',requestOptions)
         .then((response)=>{
 
             if(response.status == "200" ){
                 response.text().then(text => {
-                    //console.log(JSON.parse(text)['name']);  // important
                     // set the data
-                    console.log(JSON.parse(text));
-                    setApplicationId( JSON.parse(text)['id'] );
-                    setStatus( JSON.parse(text)['isSent'] );
-                    setSendTime( JSON.parse(text)['sendAt'] );
-                    setScores( JSON.parse(text)['scores'] ); // revise
+                    
+                    
+                    let application = JSON.parse(text).filter(application=>application['id'].toString() === id);
+                    console.log();
+                    setApplicationId( application[0]['id'] );
+                    setStatus( application[0]['isSent'] );
+                    setSendTime( application[0]['sendAt'] );
+                    setScores( application[0]['scores'] ); // revise
                     setForms({
-                        "isSent": JSON.parse(text)["isSent"],
+                        "isSent":application[0]["isSent"],
                         "studyResearchPlan": {
                             "file": forms["studyResearchPlan"]["file"],
-                            "path": JSON.parse(text)["studyResearchPlan"]["path"]
+                            "path": application[0]["studyResearchPlan"]['path']
                         },
                         "affidavit": {
                             "file": forms["affidavit"]["file"],
-                            "path": JSON.parse(text)["affidavit"]["path"]
+                            "path": application[0]["affidavit"]["path"]
                         },
                         "professorConsentForm": {
                             "file": forms["professorConsentForm"]["file"],
-                            "path": JSON.parse(text)["professorConsentForm"]["path"]
+                            "path": application[0]["professorConsentForm"]["path"]
                         }    
                     });
-                    setBasicProfile( JSON.parse(text)['applicationForm']['basicProfile'] ) ;
-                    setBachelorProfile( JSON.parse(text)['applicationForm']['bachelorProfile'] ) ;
-                    setMasterProfile( JSON.parse(text)['applicationForm']['masterProfile'] ) ;
-                    setPhdProfile( JSON.parse(text)['applicationForm']['phdProfile'] ) ;
+                    setBasicProfile( application[0]['applicationForm']['basicProfile'] ) ;
+                    setBachelorProfile( application[0]['applicationForm']['bachelorProfile'] ) ;
+                    setMasterProfile( application[0]['applicationForm']['masterProfile'] ) ;
+                    setPhdProfile( application[0]['applicationForm']['phdProfile'] ) ;
                     
                     setTranscript({
                         "bachelorTranscript": {
                             "file":transcript["bachelorTranscript"]["file"],
-                            "path": JSON.parse(text)['transcript']['bachelorTranscript']['path']
+                            "path": application[0]['transcript']['bachelorTranscript']['path']
                         },
                         "masterTranscript": {
                             "file":transcript["masterTranscript"]["file"],
-                            "path": JSON.parse(text)['transcript']['masterTranscript']['path']
+                            "path": application[0]['transcript']['masterTranscript']['path']
                         },
                         "phdTranscript": {
                             "file":transcript["phdTranscript"]["file"],
-                            "path": JSON.parse(text)['transcript']['phdTranscript']['path']
+                            "path": application[0]['transcript']['phdTranscript']['path']
                         }
                     });
 
                     setCertificate({
                         "bachelorRanking": {
                             "file": certificate["bachelorRanking"]["file"],
-                            "path": JSON.parse(text)['rankingCertificate']['bachelorRanking']['path']
+                            "path": application[0]['rankingCertificate']['bachelorRanking']['path']
                         },
                         "masterRanking": {
                             "file": certificate["masterRanking"]["file"],
-                            "path": JSON.parse(text)['rankingCertificate']["masterRanking"]['path']
+                            "path": application[0]['rankingCertificate']["masterRanking"]['path']
                         },
                         "phdRanking": {
                             "file": certificate["phdRanking"]["file"],
-                            "path": JSON.parse(text)['rankingCertificate']['phdRanking']['path']
+                            "path": application[0]['rankingCertificate']['phdRanking']['path']
                         } 
                     });
-                    setConferencePaper( JSON.parse(text)['conferencePapers'] );
-                    // console.log(JSON.parse(text)['conferencePapers'][0]['conferenceName']);
-                    setResearchProjects( JSON.parse(text)['researchProjects'] );
-                    setCourseProjects( JSON.parse(text)['courseProjects'] );
-                    setAdditionalDocument( JSON.parse(text)['additionalDocuments'] );
-                    setLanguageCertificate( JSON.parse(text)['languageCertificates'] );
-
+                    setConferencePaper( application[0]['conferencePapers'] );
+                    setResearchProjects( application[0]['researchProjects'] );
+                    setCourseProjects( application[0]['courseProjects'] );
+                    setAdditionalDocument( application[0]['additionalDocuments'] );
+                    setLanguageCertificate( application[0]['languageCertificates'] );
 
 
                 })
-                alert("fetch stored application data success");
                 return 'success'
             }
-            else if(response.status == "500"){
-                // NO build yet
-                alert("fetch stored application data failed 500");
-                return 'unbuild'
-            }
             else{
-                alert("fetch stored application data failed");
+                alert("get all application data failed");
                 return 'failed'
             }
         })
         .then((result)=>console.log(result))
         .catch((error)=>{
-            alert("get application/:id error");
+            alert("get all application error");
             console.error(error);
         });
     };
-
-    
     useEffect(()=>{
-        getStoredData();
+        const sessionUser = getSession('user');
+        if (sessionUser) {
+            session_login(sessionUser);
+        }
+        
     },[]);
+    useEffect(()=>{
+        if(user_session){
+            getAllData();
+        }
+    },[user_session])
     
     const Seminar = React.memo((props) => {
         return(
